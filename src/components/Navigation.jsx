@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import BuildingTitle from './BuildingTitle'
 
 const tabs = [
   { id: 'overview', label: 'Overview' },
@@ -18,12 +20,7 @@ function Navigation({ activeTab, onTabChange }) {
       <div className="container">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <button 
-            onClick={() => onTabChange('overview')}
-            className="text-lg font-medium text-foreground hover:opacity-70 transition-opacity"
-          >
-            Hochvolthaus Nova
-          </button>
+          <BuildingTitle onClick={() => onTabChange('overview')} />
 
           {/* Desktop Tabs */}
           <div className="hidden md:block">
@@ -37,6 +34,12 @@ function Navigation({ activeTab, onTabChange }) {
                   {tab.label}
                 </button>
               ))}
+              <Link to="/reservations" className="tab reservations-link">
+                Reservations
+              </Link>
+              <Link to="/signin" className="btn btn-primary signin-btn">
+                Sign In
+              </Link>
             </div>
           </div>
 
@@ -73,6 +76,20 @@ function Navigation({ activeTab, onTabChange }) {
                 {tab.label}
               </button>
             ))}
+            <Link 
+              to="/reservations" 
+              className="block w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-secondary"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Reservations
+            </Link>
+            <Link 
+              to="/signin" 
+              className="block w-full text-center mt-4 btn btn-primary"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Sign In
+            </Link>
           </motion.div>
         )}
       </div>

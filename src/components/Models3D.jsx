@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Database, Map, Box, FileCode, Cloud } from 'lucide-react'
 import IFCViewer from './IFCViewer'
+import CityMap from './CityMap'
 
 const modelTypes = [
   {
@@ -101,6 +102,8 @@ function Models3D() {
         >
           {activeModel === 'ifc' ? (
             <IFCViewer />
+          ) : activeModel === '3dcitydb' ? (
+            <CityMap />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Hero from './components/Hero'
 import Navigation from './components/Navigation'
@@ -9,6 +10,9 @@ import Models3D from './components/Models3D'
 import TheMinds from './components/TheMinds'
 import ChatSupport from './components/ChatSupport'
 import HistoryPage from './components/HistoryPage'
+import SignIn from './components/SignIn'
+import SignUp from './components/SignUp'
+import RoomReservation from './components/RoomReservation'
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -71,40 +75,49 @@ function App() {
   }, [])
 
   return (
-    <div className="app">
-      {showHistoryPage ? (
-        <HistoryPage onBack={() => setShowHistoryPage(false)} />
-      ) : (
-        <>
-          <Hero onExplore={() => scrollToSection('overview')} />
-          <Navigation activeTab={activeTab} onTabChange={scrollToSection} />
-          
-          <main>
-            <section ref={overviewRef} data-section="overview" className="section">
-              <Overview />
-            </section>
+    <BrowserRouter>
+      <div className="app">
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/reservations" element={<RoomReservation />} />
+          <Route path="/" element={
+            showHistoryPage ? (
+              <HistoryPage onBack={() => setShowHistoryPage(false)} />
+            ) : (
+              <>
+                <Hero onExplore={() => scrollToSection('overview')} />
+                <Navigation activeTab={activeTab} onTabChange={scrollToSection} />
+                
+                <main>
+                  <section ref={overviewRef} data-section="overview" className="section">
+                    <Overview />
+                  </section>
 
-            <section ref={conceptRef} data-section="concept" className="section">
-              <TheConcept onShowHistory={() => setShowHistoryPage(true)} />
-            </section>
+                  <section ref={conceptRef} data-section="concept" className="section">
+                    <TheConcept onShowHistory={() => setShowHistoryPage(true)} />
+                  </section>
 
-            <section ref={hubRef} data-section="hub" className="section">
-              <TheHub />
-            </section>
+                  <section ref={hubRef} data-section="hub" className="section">
+                    <TheHub />
+                  </section>
 
-            <section ref={modelsRef} data-section="models" className="section">
-              <Models3D />
-            </section>
+                  <section ref={modelsRef} data-section="models" className="section">
+                    <Models3D />
+                  </section>
 
-            <section ref={mindsRef} data-section="minds" className="section">
-              <TheMinds />
-            </section>
-          </main>
+                  <section ref={mindsRef} data-section="minds" className="section">
+                    <TheMinds />
+                  </section>
+                </main>
 
-          <ChatSupport />
-        </>
-      )}
-    </div>
+                <ChatSupport />
+              </>
+            )
+          } />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 
