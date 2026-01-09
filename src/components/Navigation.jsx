@@ -1,0 +1,83 @@
+import { motion } from 'framer-motion'
+import { Menu, X } from 'lucide-react'
+import { useState } from 'react'
+
+const tabs = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'concept', label: 'The Concept' },
+  { id: 'hub', label: 'The Hub' },
+  { id: 'models', label: '3D Models' },
+  { id: 'minds', label: 'The Minds' }
+]
+
+function Navigation({ activeTab, onTabChange }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/5">
+      <div className="container">
+        <div className="flex items-center justify-between h-14">
+          {/* Logo */}
+          <button 
+            onClick={() => onTabChange('overview')}
+            className="text-lg font-medium text-foreground hover:opacity-70 transition-opacity"
+          >
+            Hochvolthaus Nova
+          </button>
+
+          {/* Desktop Tabs */}
+          <div className="hidden md:block">
+            <div className="tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id)}
+                  className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden py-4 border-t border-black/5"
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  onTabChange(tab.id)
+                  setIsMobileMenuOpen(false)
+                }}
+                className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-foreground text-background'
+                    : 'hover:bg-secondary'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </div>
+    </nav>
+  )
+}
+
+export default Navigation
