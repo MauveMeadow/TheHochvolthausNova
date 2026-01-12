@@ -126,6 +126,7 @@ The optimized files will be in the `dist/` folder, ready for deployment.
 - Antonia-Ioulia Pozatzidou
 - Rafael Rodrigues Giglio
 - Chandana Mahesh
+- Tinhanzo Wang
 
 **Course**: Fusion Lab - ITBE Master's Program  
 **University**: Technical University of Munich (TUM)  
