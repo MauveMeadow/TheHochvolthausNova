@@ -13,6 +13,8 @@ import HistoryPage from './components/HistoryPage'
 import SignIn from './components/SignIn'
 import SignUp from './components/SignUp'
 import RoomReservation from './components/RoomReservation'
+import AnalysisViewer from './components/AnalysisViewer'
+import FormaAnalysisIntegration from './components/FormaAnalysisIntegration'
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -81,6 +83,8 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/reservations" element={<RoomReservation />} />
+          <Route path="/analysis" element={<AnalysisViewer />} />
+          <Route path="/forma-analysis" element={<FormaAnalysisIntegration />} />
           <Route path="/" element={
             showHistoryPage ? (
               <HistoryPage onBack={() => setShowHistoryPage(false)} />
