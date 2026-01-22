@@ -15,16 +15,16 @@ const teamMembers = [
     linkedin: 'https://www.linkedin.com/in/samin-eghbali'
   },
   {
-    name: 'Antonia-Ioulia Pozatzidou',
-    role: "ITBE Master's Student",
-    email: 'antonia.pozatzidou@tum.de',
-    linkedin: 'https://www.linkedin.com/in/antonia-pozatzidou'
-  },
-  {
     name: 'Rafael Rodrigues Giglio',
     role: "ITBE Master's Student",
     email: 'rafael.giglio@tum.de',
     linkedin: 'https://www.linkedin.com/in/rafael-giglio'
+  },
+  {
+    name: 'Tianzhuo Wang',
+    role: "ITBE Master's Student",
+    email: 'tianzhuo.wang@tum.de',
+    linkedin: 'https://www.linkedin.com'
   },
   {
     name: 'Chandana Mahesh',
@@ -33,10 +33,10 @@ const teamMembers = [
     linkedin: 'https://www.linkedin.com/in/chandana-mahesh'
   },
   {
-    name: 'Tianzhuo Wang',
+    name: 'Antonia-Ioulia Pozatzidou',
     role: "ITBE Master's Student",
-    email: 'tianzhuo.wang@tum.de',
-    linkedin: 'https://www.linkedin.com'
+    email: 'antonia.pozatzidou@tum.de',
+    linkedin: 'https://www.linkedin.com/in/antonia-pozatzidou'
   }
 ]
 
