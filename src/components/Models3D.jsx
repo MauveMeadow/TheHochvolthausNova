@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Database, Map, Box, FileCode, Cloud } from 'lucide-react'
-import IFCViewer from './IFCViewer'
+import IfcViewerNew from './IfcViewerNew'
 import FormaViewer from './FormaViewer'
 import CityMap from './CityMap'
 
@@ -102,7 +102,7 @@ function Models3D() {
           className="model-viewer-container"
         >
           {activeModel === 'ifc' ? (
-            <IFCViewer />
+            <IfcViewerNew />
           ) : activeModel === '3dcitydb' ? (
             <CityMap />
           ) : activeModel === 'forma' ? (

@@ -1,88 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
-import * as Cesium from 'cesium'
-import 'cesium/Build/Cesium/Widgets/widgets.css'
+import { useState } from 'react'
 import '../styles/CityMap.css'
 
 function CityMap() {
-  const cesiumContainer = useRef(null)
-  const viewerRef = useRef(null)
   const [is3D, setIs3D] = useState(true)
   const [showLayers, setShowLayers] = useState(false)
 
-  useEffect(() => {
-    if (!cesiumContainer.current || viewerRef.current) return
-
-    // Initialize Cesium Viewer without default imagery
-    const viewer = new Cesium.Viewer(cesiumContainer.current, {
-      baseLayerPicker: false,
-      animation: false,
-      timeline: false,
-      fullscreenButton: false,
-      vrButton: false,
-      geocoder: false,
-      homeButton: false,
-      infoBox: false,
-      sceneModePicker: false,
-      selectionIndicator: false,
-      navigationHelpButton: false,
-      navigationInstructionsInitiallyVisible: false,
-      shadows: false,
-      shouldAnimate: true,
-      sceneMode: Cesium.SceneMode.SCENE3D,
-      // Use false to disable default imagery, we'll add our own
-      imageryProvider: false
-    })
-
-    viewerRef.current = viewer
-
-    // Add OpenStreetMap tiles as imagery layer
-    const osmImagery = new Cesium.UrlTemplateImageryProvider({
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      maximumLevel: 19,
-      credit: 'OpenStreetMap contributors'
-    })
-    viewer.imageryLayers.addImageryProvider(osmImagery)
-    
-    // Remove sky/atmosphere for a cleaner look
-    viewer.scene.skyBox = undefined
-    viewer.scene.sun = undefined
-    viewer.scene.moon = undefined
-    viewer.scene.skyAtmosphere = undefined
-    viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#e8ecf2')
-    
-    // Make globe visible with proper settings
-    viewer.scene.globe.depthTestAgainstTerrain = false
-    viewer.scene.globe.showGroundAtmosphere = false
-    viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#e8ecf2')
-
-    // Set camera directly to Munich Hochvolthaus location
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(11.569124, 48.150773, 800),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-45),
-        roll: 0
-      }
-    })
-
-    // Cleanup on unmount
-    return () => {
-      if (viewerRef.current && !viewerRef.current.isDestroyed()) {
-        viewerRef.current.destroy()
-        viewerRef.current = null
-      }
-    }
-  }, [])
-
-  // Toggle between 2D and 3D view
+  // Toggle between 2D and 3D view (placeholder)
   const toggle2D3D = () => {
-    if (!viewerRef.current) return
-    
-    if (is3D) {
-      viewerRef.current.scene.morphTo2D(1)
-    } else {
-      viewerRef.current.scene.morphTo3D(1)
-    }
     setIs3D(!is3D)
     console.log(`Switched to ${is3D ? '2D' : '3D'} view`)
   }
@@ -99,20 +23,10 @@ function CityMap() {
     alert('Measurement tool will be implemented soon!')
   }
 
-  // Reset camera to Hochvolthaus
+  // Reset camera placeholder
   const resetCamera = () => {
-    if (!viewerRef.current) return
-    
-    viewerRef.current.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(11.569124, 48.150773, 800),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-45),
-        roll: 0
-      },
-      duration: 1.5
-    })
     console.log('Camera reset to Hochvolthaus')
+    alert('3D Map viewer will be implemented soon!')
   }
 
   return (
@@ -219,15 +133,24 @@ function CityMap() {
         </div>
       )}
 
-      {/* Cesium Container */}
-      <div 
-        ref={cesiumContainer} 
-        className="cesium-container"
-      />
+      {/* Placeholder for 3D Map */}
+      <div className="map-placeholder">
+        <div className="placeholder-content">
+          <div className="placeholder-icon">🗺️</div>
+          <h3>3D City Map</h3>
+          <p>Interactive geospatial visualization coming soon!</p>
+          <div className="placeholder-features">
+            <span>• 3D Building Models</span>
+            <span>• Satellite Imagery</span>
+            <span>• Terrain Analysis</span>
+            <span>• Urban Planning Tools</span>
+          </div>
+        </div>
+      </div>
 
       {/* Attribution */}
       <div className="map-attribution">
-        Powered by CesiumJS • © OpenStreetMap contributors
+        Interactive Map • Coming Soon
       </div>
     </div>
   )

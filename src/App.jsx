@@ -77,7 +77,7 @@ function App() {
   }, [])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/TheHochvolthausNova">
       <div className="app">
         <Routes>
           <Route path="/signin" element={<SignIn />} />

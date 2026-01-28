@@ -10,13 +10,57 @@ const FLOOR_DATA = {
     short: 'UG',
     level: -1,
     totalArea: '1,350.75 m²',
-    gridTemplate: { rows: 4, cols: 3 },
+    gridTemplate: { rows: 9, cols: 14 },
     rooms: [
-      { id: 'b1', name: 'Storage Room', type: 'Storage', capacity: 5, cssArea: '1 / 1 / 3 / 2', events: [{ title: 'Storage Inventory', date: 'Nov 12, 2025' }] },
-      { id: 'b2', name: 'Parking Area', type: 'Parking', capacity: 20, cssArea: '1 / 2 / 4 / 4', events: [] },
-      { id: 'b3', name: 'Mechanical Room', type: 'Utility', capacity: 3, cssArea: '3 / 1 / 5 / 2', events: [{ title: 'Maintenance Check', date: 'Nov 10, 2025' }] },
-      { id: 'b4', name: 'Electrical Room', type: 'Utility', capacity: 2, cssArea: '4 / 2 / 5 / 3', events: [] },
-      { id: 'b5', name: 'Archive', type: 'Storage', capacity: 4, cssArea: '4 / 3 / 5 / 4', events: [] }
+      // TOP ROW - Individual Study Rooms (Row 1)
+      { id: 'b1', name: 'Individual Study 1', type: 'Office', capacity: 5, cssArea: '1 / 1 / 2 / 2', events: [] },
+      { id: 'b2', name: 'Individual Study 2', type: 'Office', capacity: 5, cssArea: '1 / 2 / 2 / 3', events: [] },
+      { id: 'b3', name: 'Individual Study 3', type: 'Office', capacity: 5, cssArea: '1 / 3 / 2 / 4', events: [] },
+      { id: 'b4', name: 'Individual Study 4', type: 'Office', capacity: 5, cssArea: '1 / 4 / 2 / 5', events: [] },
+      { id: 'b5', name: 'Individual Study 5', type: 'Office', capacity: 5, cssArea: '1 / 5 / 2 / 6', events: [] },
+      { id: 'b6', name: 'Individual Study 6', type: 'Office', capacity: 5, cssArea: '1 / 6 / 2 / 7', events: [] },
+      { id: 'b7', name: 'Individual Study 7', type: 'Office', capacity: 6, cssArea: '1 / 7 / 2 / 8', events: [] },
+      { id: 'b8', name: 'Individual Study 8', type: 'Office', capacity: 6, cssArea: '1 / 8 / 2 / 9', events: [] },
+      { id: 'b9', name: 'Individual Study 9', type: 'Office', capacity: 6, cssArea: '1 / 9 / 2 / 10', events: [] },
+      { id: 'b10', name: 'Individual Study 10', type: 'Office', capacity: 6, cssArea: '1 / 10 / 2 / 11', events: [] },
+      { id: 'b11', name: 'Group Study 1', type: 'Meeting', capacity: 8, cssArea: '1 / 11 / 2 / 12', events: [] },
+      { id: 'b12', name: 'Group Study 2', type: 'Meeting', capacity: 8, cssArea: '1 / 12 / 2 / 13', events: [] },
+      { id: 'b13', name: 'Group Study 3', type: 'Meeting', capacity: 8, cssArea: '1 / 13 / 2 / 15', events: [] },
+      
+      // SECOND ROW - Double Study & Recording Rooms (Row 2-3)
+      { id: 'b14', name: 'Recording Room 1', type: 'Lab', capacity: 3, cssArea: '2 / 1 / 4 / 2', events: [] },
+      { id: 'b15', name: 'Double Study 1', type: 'Office', capacity: 6, cssArea: '2 / 2 / 3 / 4', events: [] },
+      { id: 'b16', name: 'Double Study 2', type: 'Office', capacity: 6, cssArea: '3 / 2 / 4 / 4', events: [] },
+      { id: 'b17', name: 'Double Study 3', type: 'Office', capacity: 6, cssArea: '2 / 4 / 3 / 6', events: [] },
+      { id: 'b18', name: 'Double Study 4', type: 'Office', capacity: 8, cssArea: '3 / 4 / 4 / 6', events: [] },
+      { id: 'b19', name: 'Double Study 5', type: 'Office', capacity: 6, cssArea: '2 / 6 / 4 / 8', events: [] },
+      { id: 'b20', name: 'Editing Room 1', type: 'Lab', capacity: 2, cssArea: '2 / 10 / 3 / 11', events: [] },
+      { id: 'b21', name: 'Editing Room 2', type: 'Lab', capacity: 2, cssArea: '2 / 11 / 3 / 12', events: [] },
+      { id: 'b22', name: 'Editing Room 3', type: 'Lab', capacity: 3, cssArea: '3 / 10 / 4 / 11', events: [] },
+      { id: 'b23', name: 'Editing Room 4', type: 'Lab', capacity: 3, cssArea: '3 / 11 / 4 / 12', events: [] },
+      { id: 'b24', name: 'Server Room 1', type: 'Utility', capacity: 2, cssArea: '2 / 12 / 3 / 15', events: [] },
+      { id: 'b25', name: 'Server Room 2', type: 'Utility', capacity: 2, cssArea: '3 / 12 / 4 / 15', events: [] },
+      
+      // MIDDLE SECTION - AR/VR Rooms & Circulation (Row 4)
+      { id: 'b26', name: 'Storage Room', type: 'Storage', capacity: 10, cssArea: '4 / 1 / 5 / 3', events: [] },
+      { id: 'b27', name: 'AR/VR Room 3', type: 'Lab', capacity: 10, cssArea: '4 / 4 / 5 / 7', events: [] },
+      { id: 'b28', name: 'AR/VR Room 4', type: 'Lab', capacity: 10, cssArea: '4 / 7 / 5 / 10', events: [] },
+      { id: 'b29', name: 'Electrical Room', type: 'Utility', capacity: 3, cssArea: '4 / 12 / 5 / 15', events: [] },
+      
+      // LEFT SIDE - Offices (Rows 5-8)
+      { id: 'b30', name: 'Printing Room', type: 'Utility', capacity: 6, cssArea: '5 / 1 / 6 / 3', events: [] },
+      { id: 'b31', name: 'Creativity Room', type: 'Lab', capacity: 15, cssArea: '6 / 1 / 7 / 3', events: [] },
+      { id: 'b32', name: 'Computer Room 1', type: 'Lab', capacity: 25, cssArea: '7 / 1 / 9 / 3', events: [] },
+      
+      // CENTER - Open Theatre (Main Feature)
+      { id: 'b33', name: 'Open Theatre', type: 'Amenity', capacity: 200, cssArea: '5 / 3 / 10 / 12', events: [{ title: 'Grand Opening', date: 'Nov 28, 2025' }, { title: 'Live Performance', date: 'Dec 5, 2025' }] },
+      
+      // RIGHT SIDE - Computer Rooms (Rows 5-8)
+      { id: 'b34', name: 'Computer Room 3', type: 'Lab', capacity: 20, cssArea: '5 / 12 / 7 / 15', events: [] },
+      { id: 'b35', name: 'Computer Room 4', type: 'Lab', capacity: 20, cssArea: '7 / 12 / 9 / 15', events: [] },
+      
+      // BOTTOM ROW - Foyer (Row 9)
+      { id: 'b36', name: 'Foyer', type: 'Common', capacity: 80, cssArea: '9 / 1 / 10 / 15', events: [] }
     ]
   },
   ground: {

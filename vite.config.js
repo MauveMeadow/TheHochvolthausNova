@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import cesium from 'vite-plugin-cesium'
 
 export default defineConfig({
-  plugins: [react(), cesium()],
+  base: '/TheHochvolthausNova/',
+  plugins: [react()],
   server: {
     port: 3000,
     mimeTypes: {
@@ -13,8 +13,13 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       supported: {
-        bigint: true
+        bigint: true,
+        'top-level-await': true
       }
-    }
+    },
+    exclude: ['@thatopen/fragments']
   },
+  build: {
+    target: 'esnext'
+  }
 })
