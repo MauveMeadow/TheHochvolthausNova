@@ -63,19 +63,7 @@ function Overview() {
             principles with environmental consciousness, creating spaces that inspire and endure.
           </motion.p>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="flex gap-4 justify-center flex-wrap"
-          >
-            <button className="btn btn-primary">
-              Explore the Design
-            </button>
-            <button className="btn btn-secondary">
-              View Timeline
-            </button>
-          </motion.div>
+
         </div>
 
         {/* Stats Grid */}
@@ -103,61 +91,6 @@ function Overview() {
           })}
         </motion.div>
 
-        {/* Project Description */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="mt-20"
-        >
-          <h2 className="mb-6 text-center">A Vision for Sustainable Development</h2>
-          <div className="grid md:grid-cols-2 gap-8 text-left">
-            <div>
-              <h3 className="mb-4 text-primary">The Challenge</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                The Hochvolthaus, originally constructed between 1957 and 1963 as a high-voltage research 
-                facility, stands as a landmark of post-war technical architecture. Today, it presents a unique 
-                opportunity to demonstrate how historic engineering buildings can be repurposed into dynamic 
-                educational environments.
-              </p>
-            </div>
-            <div>
-              <h3 className="mb-4 text-primary">Our Approach</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                This redesign project represents a fundamental shift in how we approach urban architecture. 
-                By integrating cutting-edge sustainable technologies with timeless design principles, we're 
-                creating a space that serves both present needs and future generations while preserving the 
-                building's architectural legacy.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Key Features */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="mt-16 bg-primary text-white rounded-3xl p-12"
-        >
-          <h2 className="mb-8 text-center">Project Highlights</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">6</div>
-              <div className="text-white/80">Floor Levels</div>
-            </div>
-            <div className="text-center border-l border-r border-white/20">
-              <div className="text-4xl font-bold mb-2">22m</div>
-              <div className="text-white/80">Building Height</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">1957</div>
-              <div className="text-white/80">Original Construction</div>
-            </div>
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   )

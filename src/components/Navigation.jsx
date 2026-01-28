@@ -8,7 +8,7 @@ const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'concept', label: 'The Concept' },
   { id: 'hub', label: 'The Hub' },
-  { id: 'models', label: '3D Models' },
+  { id: 'models', label: 'Model Explorer' },
   { id: 'minds', label: 'The Minds' }
 ]
 

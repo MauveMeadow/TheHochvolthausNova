@@ -13,13 +13,8 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       supported: {
-        bigint: true,
-        'top-level-await': true
+        bigint: true
       }
-    },
-    exclude: ['@thatopen/fragments']
+    }
   },
-  build: {
-    target: 'esnext'
-  }
 })

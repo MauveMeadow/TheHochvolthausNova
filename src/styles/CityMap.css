@@ -1,17 +1,26 @@
 /* ==========================================
-   3D City Map Placeholder Styles
+   3D City Map - Cesium Viewer Styles
    ========================================== */
 
 .city-map-wrapper {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 700px;
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   border-radius: 1rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  background: #1a1a1a;
 }
 
+.cesium-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Fallback placeholder (not normally visible) */
 .map-placeholder {
   width: 100%;
   height: 100%;

@@ -76,25 +76,7 @@ function Hero({ onExplore }) {
           blending heritage preservation with cutting-edge sustainability.
         </motion.p>
 
-        {/* CTA Buttons */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
-        >
-          <button
-            onClick={onExplore}
-            className="px-8 py-4 bg-primary text-white rounded-full font-medium hover:bg-primary/90 transition-all hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group"
-          >
-            Explore the Project
-            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={onExplore}
-            className="px-8 py-4 bg-white border-2 border-primary/20 text-primary rounded-full font-medium hover:border-primary/40 hover:bg-primary/5 transition-all hover:shadow-lg"
-          >
-            Learn More
-          </button>
-        </motion.div>
+
 
         {/* Scroll Indicator */}
         <motion.div
