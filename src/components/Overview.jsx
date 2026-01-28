@@ -40,16 +40,11 @@ function Overview() {
             className="relative w-full max-w-5xl mx-auto mb-12"
           >
             <div className="aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center p-8">
-                  <Building2 className="w-32 h-32 mx-auto mb-6 text-primary opacity-20" />
-                  <p className="text-muted-foreground text-lg">
-                    Building visualization placeholder
-                    <br />
-                    <span className="text-sm">Add your Hochvolthaus image here</span>
-                  </p>
-                </div>
-              </div>
+              <img 
+                src="./hochvolthaus-render.png" 
+                alt="Hochvolthaus Nova - 3D Render with Solar Panels"
+                className="w-full h-full object-cover"
+              />
             </div>
           </motion.div>
           
