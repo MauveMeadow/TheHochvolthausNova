@@ -485,9 +485,9 @@ const IFCViewer = () => {
         const ifcApi = new WebIFC.IfcAPI();
         ifcApiRef.current = ifcApi;
         
-        // Set WASM path
-        ifcApi.SetWasmPath('/wasm/');
-        console.log('WASM path set to /wasm/');
+        // Set WASM path - USE CDN to fix 404 error on GitHub Pages
+        ifcApi.SetWasmPath('https://unpkg.com/web-ifc@0.0.75/');
+        console.log('WASM path set to CDN: https://unpkg.com/web-ifc@0.0.75/');
         
         setLoadingProgress('Loading WASM module...');
         await ifcApi.Init();
@@ -497,9 +497,16 @@ const IFCViewer = () => {
 
         // Fetch the IFC file
         setLoadingProgress('Fetching IFC file...');
-        console.log('Fetching /Project1.ifc...');
         
-        const response = await fetch('/Project1.ifc');
+        // Use base path for GitHub Pages deployment
+        const basePath = import.meta.env.BASE_URL || '/';
+        console.log('Fetching IFC file with basePath:', basePath);
+        
+        let response = await fetch(`${basePath}Hochvolthaus.ifc`);
+        if (!response.ok) {
+          console.log('Hochvolthaus.ifc not found, trying Project1.ifc...');
+          response = await fetch(`${basePath}Project1.ifc`);
+        }
         if (!response.ok) {
           throw new Error(`Failed to fetch IFC file: ${response.status} ${response.statusText}`);
         }
