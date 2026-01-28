@@ -6,10 +6,7 @@
     <title>Shadow Simulation - 3D Solar Installation Viewer</title>
     
     <!-- Cesium CSS -->
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Widgets/widgets.css" rel="stylesheet">
-    
-    <!-- Cesium JS -->
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
     
     <style>
         * {
@@ -417,39 +414,35 @@
         Powered by <a href="https://cesium.com" target="_blank">Cesium</a> | 3D Geospatial Visualization
     </div>
 
-<script>
-    console.log('Page loaded, checking Cesium...');
-
-    // Wait for Cesium to load
-    function waitForCesium(callback, timeout = 10000) {
-        const startTime = Date.now();
-        
-        function check() {
-            if (typeof Cesium !== 'undefined') {
-                console.log('Cesium loaded successfully');
-                callback();
-            } else if (Date.now() - startTime > timeout) {
-                console.error('Cesium failed to load within timeout');
-                document.getElementById('cesiumContainer').innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: red; font-size: 18px; text-align: center; background: rgba(0,0,0,0.8); padding: 30px; border-radius: 10px;"><strong>Error:</strong><br/>Cesium library failed to load.<br/><br/>Please check your internet connection.<br/><button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button></div>';
-                document.getElementById('loadingIndicator').style.display = 'none';
-            } else {
-                setTimeout(check, 100);
-            }
-        }
-        
-        check();
+    <!-- Load Cesium JS synchronously -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+    
+    <script>
+    // Global functions for buttons
+    function openAbout() {
+        alert('🌟 Shadow Simulation v1.0\n\nAdvanced 3D solar installation viewer with real-time shadow analysis.\n\nFeatures:\n• Dual asset visualization (Assets 4392344 & 4392629)\n• Precise CET-based date/time control\n• Real-time shadow simulation\n• OSM buildings context layer\n• Element visibility control\n• Interactive property inspection\n\nBuilt with Cesium.js for geospatial visualization.');
     }
 
-    // Start initialization once Cesium is available
-    waitForCesium(initializeApp);
+    function openHelp() {
+        alert('📖 Quick Start Guide\n\n1. DATE/TIME CONTROL:\n   • Click "Set Date/Time" for custom date/time (CET)\n   • Use Quick Selection for preset times\n   • Shadows update automatically\n\n2. ASSET VISIBILITY:\n   • Toggle Asset 1 & 2 independently\n   • Enable/disable OSM buildings for context\n\n3. ELEMENT SELECTION:\n   • Click any 3D element to select\n   • Properties appear on the right\n   • Click "Hide Selected" to hide elements\n   • Use "Show All Hidden" to restore\n\n4. NAVIGATION:\n   • Left-click drag to rotate view\n   • Right-click drag to pan\n   • Scroll to zoom\n   • "Reset Camera" returns to default view');
+    }
 
-    // ==================== CESIUM CONFIGURATION ====================
+    // Check if Cesium loaded
+    if (typeof Cesium === 'undefined') {
+        document.getElementById('loadingIndicator').innerHTML = '<div style="color: #ff6b6b;">Error: Cesium library failed to load.<br><br>Please check your internet connection.<br><button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button></div>';
+    } else {
+        // Cesium loaded successfully - initialize the app
+        initializeApp();
+    }
+
     function initializeApp() {
+        console.log('Cesium loaded successfully, initializing app...');
+        
         Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTQyMjc5My0wNWMxLTQwYjItYTQ2Ny1hN2NmMWQzZTU1ODgiLCJpZCI6Mzc5Njc4LCJpYXQiOjE3Njg1NjY1ODJ9.uNoYxXVWAb2rKHk2u5Etox_rRfq7IUnCFsAK_424OiQ';
 
-        const MODEL_ASSET_ID_1 = '4392344';
-        const MODEL_ASSET_ID_2 = '4392629';
-        const OSM_BUILDINGS_ASSET_ID = '96188';
+        const MODEL_ASSET_ID_1 = 4392344;
+        const MODEL_ASSET_ID_2 = 4392629;
+        const OSM_BUILDINGS_ASSET_ID = 96188;
         let viewer;
         let modelPrimitive1 = null;
         let modelPrimitive2 = null;
@@ -463,16 +456,13 @@
         let hiddenElements = new Map();
         let selectedElementForHiding = null;
 
-        // ==================== INITIALIZATION ====================
+        // Initialize viewer
         async function initializeViewer() {
             try {
                 console.log('Initializing Cesium Viewer...');
 
                 viewer = new Cesium.Viewer('cesiumContainer', {
-                    terrain: Cesium.Terrain.fromWorldTerrain({
-                        requestWaterMask: true,
-                        requestVertexNormals: true
-                    }),
+                    terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
                     shadows: true,
                     shouldAnimate: true
                 });
@@ -481,16 +471,10 @@
                 viewer.scene.shadowMap.softShadows = true;
                 viewer.scene.shadowMap.darkness = 0.5;
                 viewer.scene.globe.enableLighting = true;
-                viewer.scene.lightSource = new Cesium.DirectionalLight({
-                    direction: new Cesium.Cartesian3(0.1, 0.2, 1)
-                });
 
                 console.log('Viewer initialized with Cesium World Terrain');
 
-                const loadingIndicator = document.getElementById('loadingIndicator');
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
-                }
+                document.getElementById('loadingIndicator').style.display = 'none';
 
                 await loadModel();
                 setupControlPanel();
@@ -501,14 +485,14 @@
             } catch (error) {
                 console.error('Initialization error:', error);
                 showStatusMessage('Error initializing viewer: ' + error.message);
-                document.getElementById('loadingIndicator').innerHTML = '<div style="color: red; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;"><strong>Error:</strong><br/>' + error.message + '</div>';
+                document.getElementById('loadingIndicator').innerHTML = '<div style="color: #ff6b6b;">Error: ' + error.message + '<br><button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Retry</button></div>';
             }
         }
 
-        // ==================== MODEL LOADING ====================
+        // Load models
         async function loadModel() {
             try {
-                console.log(`Loading 3D models...`);
+                console.log('Loading 3D models...');
 
                 const [tileset1, tileset2] = await Promise.all([
                     Cesium.Cesium3DTileset.fromIonAssetId(MODEL_ASSET_ID_1, {
@@ -542,7 +526,7 @@
             }
         }
 
-        // ==================== PICK HANDLER ====================
+        // Pick handler
         function setupPickHandler() {
             const canvas = viewer.canvas;
             canvas.addEventListener('click', function onCanvasClick(e) {
@@ -560,7 +544,7 @@
             });
         }
 
-        // ==================== ELEMENT INFO DISPLAY ====================
+        // Display element info
         function displayElementInfo(entity) {
             selectedEntity = entity;
             selectedElementForHiding = entity;
@@ -615,12 +599,7 @@
                     const isImportant = importantProps.includes(key);
                     const className = isImportant ? 'property-item important' : 'property-item';
 
-                    htmlContent += `
-                        <div class="${className}">
-                            <div class="property-key">${escapeHtml(key)}</div>
-                            <div class="property-value">${escapeHtml(String(value))}</div>
-                        </div>
-                    `;
+                    htmlContent += '<div class="' + className + '"><div class="property-key">' + escapeHtml(key) + '</div><div class="property-value">' + escapeHtml(String(value)) + '</div></div>';
                 }
             }
 
@@ -646,27 +625,27 @@
             }
         }
 
-        // ==================== CONTROL PANEL ====================
+        // Control panel
         function setupControlPanel() {
             const controlPanel = document.getElementById('controlPanel');
 
             let panelHtml = '<h3>☀️ Shadow Simulation</h3>';
             panelHtml += '<div class="button-group">';
-            panelHtml += '<button class="control-btn" id="setDateTimeBtn" style="font-size: 16px;">📅 Set Date/Time</button>';
-            panelHtml += '<button class="control-btn" id="resetCameraBtn" style="font-size: 16px;">🎥 Reset Camera</button>';
+            panelHtml += '<button class="control-btn" id="setDateTimeBtn">📅 Set Date/Time</button>';
+            panelHtml += '<button class="control-btn" id="resetCameraBtn">🎥 Reset Camera</button>';
             panelHtml += '</div>';
             
             panelHtml += '<label style="margin-top: 15px; display: block; font-weight: 600; color: #333; margin-bottom: 10px; font-size: 14px;">Asset Visibility:</label>';
             panelHtml += '<div class="button-group">';
-            panelHtml += '<button class="control-btn" id="model1Btn" style="font-size: 14px;">👁️ Asset 1 (4392344): ON</button>';
-            panelHtml += '<button class="control-btn" id="model2Btn" style="font-size: 14px;">👁️ Asset 2 (4392629): ON</button>';
-            panelHtml += '<button class="control-btn" id="osmBuildingsBtn" style="font-size: 14px;">🏢 OSM Buildings: OFF</button>';
+            panelHtml += '<button class="control-btn" id="model1Btn">👁️ Asset 1: ON</button>';
+            panelHtml += '<button class="control-btn" id="model2Btn">👁️ Asset 2: ON</button>';
+            panelHtml += '<button class="control-btn" id="osmBuildingsBtn">🏢 OSM Buildings: OFF</button>';
             panelHtml += '</div>';
             
             panelHtml += '<label style="margin-top: 15px; display: block; font-weight: 600; color: #333; margin-bottom: 10px; font-size: 14px;">Element Visibility:</label>';
             panelHtml += '<div class="button-group">';
-            panelHtml += '<button class="control-btn" id="hideSelectedBtn" style="font-size: 14px; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">👁️ Hide Selected</button>';
-            panelHtml += '<button class="control-btn" id="showAllBtn" style="font-size: 14px; background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);">👁️ Show All Hidden</button>';
+            panelHtml += '<button class="control-btn" id="hideSelectedBtn" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">👁️ Hide Selected</button>';
+            panelHtml += '<button class="control-btn" id="showAllBtn" style="background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);">👁️ Show All Hidden</button>';
             panelHtml += '<div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 6px; margin-top: 8px; font-size: 13px; color: #666;">Hidden elements: <span id="hiddenCount">0</span></div>';
             panelHtml += '</div>';
             
@@ -682,24 +661,24 @@
 
             controlPanel.innerHTML = panelHtml;
 
-            setTimeout(() => {
-                document.getElementById('setDateTimeBtn')?.addEventListener('click', setDateTimePrompt);
-                document.getElementById('resetCameraBtn')?.addEventListener('click', resetCamera);
-                document.getElementById('model1Btn')?.addEventListener('click', toggleModel1);
-                document.getElementById('model2Btn')?.addEventListener('click', toggleModel2);
-                document.getElementById('osmBuildingsBtn')?.addEventListener('click', toggleOSMBuildings);
-                document.getElementById('hideSelectedBtn')?.addEventListener('click', hideSelectedElement);
-                document.getElementById('showAllBtn')?.addEventListener('click', showAllHiddenElements);
-                document.getElementById('quickTimeSelect')?.addEventListener('change', function(e) {
+            setTimeout(function() {
+                document.getElementById('setDateTimeBtn').addEventListener('click', setDateTimePrompt);
+                document.getElementById('resetCameraBtn').addEventListener('click', resetCamera);
+                document.getElementById('model1Btn').addEventListener('click', toggleModel1);
+                document.getElementById('model2Btn').addEventListener('click', toggleModel2);
+                document.getElementById('osmBuildingsBtn').addEventListener('click', toggleOSMBuildings);
+                document.getElementById('hideSelectedBtn').addEventListener('click', hideSelectedElement);
+                document.getElementById('showAllBtn').addEventListener('click', showAllHiddenElements);
+                document.getElementById('quickTimeSelect').addEventListener('change', function(e) {
                     if (e.target.value) {
                         handleQuickTimeSelect(e.target.value);
-                        setTimeout(() => { e.target.value = ''; }, 100);
+                        setTimeout(function() { e.target.value = ''; }, 100);
                     }
                 });
             }, 100);
         }
 
-        // ==================== DATE/TIME CONTROL ====================
+        // Date/time control
         function setDateTimePrompt() {
             const dateInput = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
             if (dateInput === null) return;
@@ -724,8 +703,13 @@
 
         function setDateTimeFromInput(dateString, timeString) {
             try {
-                const [year, month, day] = dateString.split('-').map(Number);
-                const [hours, minutes] = timeString.split(':').map(Number);
+                const parts = dateString.split('-');
+                const timeParts = timeString.split(':');
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const day = parseInt(parts[2]);
+                const hours = parseInt(timeParts[0]);
+                const minutes = parseInt(timeParts[1]);
 
                 const date = new Date(year, month - 1, day, hours, minutes, 0);
                 const cetOffset = getCETOffset(date);
@@ -737,8 +721,8 @@
                 updateShadowDirection();
                 updateTimeDisplay();
 
-                console.log(`Time set to: ${dateString} ${timeString} CET`);
-                showStatusMessage(`Time set to: ${dateString} ${timeString} CET`);
+                console.log('Time set to: ' + dateString + ' ' + timeString + ' CET');
+                showStatusMessage('Time set to: ' + dateString + ' ' + timeString + ' CET');
             } catch (error) {
                 console.error('Date/Time parsing error:', error);
                 showStatusMessage('Error parsing date/time');
@@ -750,7 +734,9 @@
                 currentTime = Cesium.JulianDate.now();
             } else {
                 const cesiumDate = Cesium.JulianDate.toDate(currentTime);
-                const [hours, minutes] = value.split(':').map(Number);
+                const timeParts = value.split(':');
+                const hours = parseInt(timeParts[0]);
+                const minutes = parseInt(timeParts[1]);
 
                 const date = new Date(cesiumDate.getFullYear(), cesiumDate.getMonth(), cesiumDate.getDate(), hours, minutes, 0);
                 const cetOffset = getCETOffset(date);
@@ -764,16 +750,16 @@
             updateTimeDisplay();
         }
 
-        // ==================== SHADOW CALCULATION ====================
+        // Shadow calculation
         function updateShadowDirection() {
             const date = Cesium.JulianDate.toDate(currentTime);
             const sunPosition = calculateSunPosition(date);
 
-            if (viewer.scene.lightSource) {
-                viewer.scene.lightSource.direction = sunPosition;
+            if (viewer.scene.light) {
+                viewer.scene.light.direction = sunPosition;
             }
 
-            console.log(`Shadow direction updated for: ${date.toISOString()}`);
+            console.log('Shadow direction updated for: ' + date.toISOString());
         }
 
         function calculateSunPosition(date) {
@@ -790,7 +776,7 @@
             return new Cesium.Cartesian3(x, y, z);
         }
 
-        // ==================== TIME CONVERSION ====================
+        // Time conversion
         function getCETOffset(date) {
             const year = date.getFullYear();
             const lastSundayMarch = getLastSunday(year, 2);
@@ -811,7 +797,7 @@
             return date;
         }
 
-        // ==================== DISPLAY UPDATES ====================
+        // Display updates
         function updateTimeDisplay() {
             const dateUtc = Cesium.JulianDate.toDate(currentTime);
             const cetOffset = getCETOffset(dateUtc);
@@ -824,8 +810,8 @@
             const timeStr = cetDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
             
             let html = '<div class="time-display"><strong>Current Time:</strong></div>';
-            html += `<div style="font-size: 16px; font-weight: 600; margin: 8px 0;">${dateStr}</div>`;
-            html += `<div style="font-size: 16px; font-weight: 600;">${timeStr} CET</div>`;
+            html += '<div style="font-size: 16px; font-weight: 600; margin: 8px 0;">' + dateStr + '</div>';
+            html += '<div style="font-size: 16px; font-weight: 600;">' + timeStr + ' CET</div>';
 
             timeInfo.innerHTML = html;
         }
@@ -837,7 +823,7 @@
             }
         }
 
-        // ==================== ASSET VISIBILITY ====================
+        // Asset visibility
         function toggleModel1() {
             if (!modelPrimitive1) {
                 showStatusMessage('Asset 1 not loaded');
@@ -847,12 +833,12 @@
             if (model1Visible) {
                 modelPrimitive1.show = false;
                 model1Visible = false;
-                document.getElementById('model1Btn').textContent = '👁️ Asset 1 (4392344): OFF';
+                document.getElementById('model1Btn').textContent = '👁️ Asset 1: OFF';
                 showStatusMessage('Asset 1 disabled');
             } else {
                 modelPrimitive1.show = true;
                 model1Visible = true;
-                document.getElementById('model1Btn').textContent = '👁️ Asset 1 (4392344): ON';
+                document.getElementById('model1Btn').textContent = '👁️ Asset 1: ON';
                 showStatusMessage('Asset 1 enabled');
             }
         }
@@ -866,17 +852,17 @@
             if (model2Visible) {
                 modelPrimitive2.show = false;
                 model2Visible = false;
-                document.getElementById('model2Btn').textContent = '👁️ Asset 2 (4392629): OFF';
+                document.getElementById('model2Btn').textContent = '👁️ Asset 2: OFF';
                 showStatusMessage('Asset 2 disabled');
             } else {
                 modelPrimitive2.show = true;
                 model2Visible = true;
-                document.getElementById('model2Btn').textContent = '👁️ Asset 2 (4392629): ON';
+                document.getElementById('model2Btn').textContent = '👁️ Asset 2: ON';
                 showStatusMessage('Asset 2 enabled');
             }
         }
 
-        // ==================== OSM BUILDINGS TOGGLE ====================
+        // OSM Buildings toggle
         async function toggleOSMBuildings() {
             try {
                 if (osmBuildingsVisible) {
@@ -903,7 +889,7 @@
             }
         }
 
-        // ==================== ELEMENT VISIBILITY ====================
+        // Element visibility
         function hideSelectedElement() {
             if (!selectedElementForHiding) {
                 showStatusMessage('No element selected. Click on an element first.');
@@ -919,7 +905,7 @@
 
             selectedElementForHiding.show = false;
             updateHiddenCounter();
-            showStatusMessage(`Element hidden (${hiddenElements.size} hidden)`);
+            showStatusMessage('Element hidden (' + hiddenElements.size + ' hidden)');
             
             selectedElementForHiding = null;
             closeInfoBox();
@@ -931,7 +917,7 @@
                 return;
             }
 
-            hiddenElements.forEach((state, element) => {
+            hiddenElements.forEach(function(state, element) {
                 element.show = true;
                 element.color = state.originalColor;
             });
@@ -948,7 +934,7 @@
             }
         }
 
-        // ==================== UTILITY FUNCTIONS ====================
+        // Utility functions
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -961,64 +947,17 @@
             statusDiv.textContent = message;
             document.body.appendChild(statusDiv);
 
-            setTimeout(() => {
+            setTimeout(function() {
                 statusDiv.remove();
             }, 3000);
         }
 
-        // ==================== AUTO-UPDATE TIME DISPLAY ====================
+        // Auto-update time display
         setInterval(updateTimeDisplay, 1000);
 
-        // ==================== START APPLICATION ====================
+        // Start application
         initializeViewer();
     }
-
-    // Global functions for buttons
-    function openAbout() {
-        alert(`🌟 Shadow Simulation v1.0
-
-Advanced 3D solar installation viewer with real-time shadow analysis.
-
-Features:
-• Dual asset visualization (Assets 4392344 & 4392629)
-• Precise CET-based date/time control
-• Real-time shadow simulation
-• OSM buildings context layer
-• Element visibility control
-• Interactive property inspection
-
-Built with Cesium.js for geospatial visualization.`);
-    }
-
-    function openHelp() {
-        alert(`📖 Quick Start Guide
-
-1. DATE/TIME CONTROL:
-   • Click "Set Date/Time" for custom date/time (CET)
-   • Use Quick Selection for preset times
-   • Shadows update automatically
-
-2. ASSET VISIBILITY:
-   • Toggle Asset 1 & 2 independently
-   • Enable/disable OSM buildings for context
-
-3. ELEMENT SELECTION:
-   • Click any 3D element to select
-   • Properties appear on the right
-   • Click "Hide Selected" to hide elements
-   • Use "Show All Hidden" to restore
-
-4. NAVIGATION:
-   • Left-click drag to rotate view
-   • Right-click drag to pan
-   • Scroll to zoom
-   • "Reset Camera" returns to default view
-
-5. SHADOW SIMULATION:
-   • Realistic sun position based on date/time
-   • Automatically handles CET/CEST (summer/winter time)
-   • Shadows update in real-time`);
-    }
-</script>
+    </script>
 </body>
 </html>
