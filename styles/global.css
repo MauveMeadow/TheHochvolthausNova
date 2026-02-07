@@ -395,9 +395,6 @@ p {
   color: var(--primary-foreground);
   border-color: var(--primary);
 }
-  background: var(--card);
-  border-top: 1px solid var(--border);
-}
 
 @media (max-width: 600px) {
   .chat-support {
