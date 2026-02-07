@@ -69,15 +69,21 @@ const FLOOR_DATA = {
     short: 'GR',
     level: 0,
     totalArea: '1,396.57 m²',
-    gridTemplate: { rows: 4, cols: 4 },
+    gridTemplate: { rows: 8, cols: 10 },
     rooms: [
-      { id: 'g1', name: 'Main Lobby', type: 'Common', capacity: 50, cssArea: '1 / 1 / 3 / 3', events: [{ title: 'Welcome Reception', date: 'Nov 15, 2025' }] },
-      { id: 'g2', name: 'Reception', type: 'Office', capacity: 4, cssArea: '1 / 3 / 2 / 5', events: [] },
-      { id: 'g3', name: 'Security Office', type: 'Office', capacity: 3, cssArea: '2 / 3 / 3 / 4', events: [] },
-      { id: 'g4', name: 'Mail Room', type: 'Utility', capacity: 2, cssArea: '2 / 4 / 3 / 5', events: [] },
-      { id: 'g5', name: 'Café', type: 'Amenity', capacity: 30, cssArea: '3 / 1 / 5 / 3', events: [{ title: 'Coffee Tasting', date: 'Nov 8, 2025' }] },
-      { id: 'g6', name: 'Meeting Room A', type: 'Meeting', capacity: 12, cssArea: '3 / 3 / 4 / 5', events: [{ title: 'Team Standup', date: 'Nov 9, 2025' }] },
-      { id: 'g7', name: 'Restrooms', type: 'Utility', capacity: 0, cssArea: '4 / 3 / 5 / 5', events: [] }
+      { id: 'g1', name: 'Exhibition', type: 'Common', capacity: 60, cssArea: '1 / 1 / 4 / 4', events: [{ title: 'Art Exhibition Opening', date: 'Nov 15, 2025' }] },
+      { id: 'g2', name: 'Room 1', type: 'Office', capacity: 8, cssArea: '1 / 4 / 2 / 5', events: [] },
+      { id: 'g3', name: 'Provo', type: 'Lab', capacity: 6, cssArea: '1 / 5 / 2 / 6', events: [] },
+      { id: 'g4', name: 'Exhibition Storage', type: 'Storage', capacity: 4, cssArea: '1 / 6 / 2 / 8', events: [] },
+      { id: 'g5', name: 'Room 2', type: 'Office', capacity: 8, cssArea: '2 / 4 / 3 / 6', events: [] },
+      { id: 'g6', name: 'Café', type: 'Amenity', capacity: 30, cssArea: '1 / 8 / 3 / 11', events: [{ title: 'Coffee Tasting', date: 'Nov 8, 2025' }] },
+      { id: 'g7', name: 'Corridor', type: 'Common', capacity: 0, cssArea: '3 / 8 / 4 / 11', events: [] },
+      { id: 'g8', name: 'Lounge Area', type: 'Amenity', capacity: 20, cssArea: '4 / 1 / 6 / 3', events: [] },
+      { id: 'g9', name: 'Amphitheater', type: 'Meeting', capacity: 120, cssArea: '4 / 3 / 7 / 8', events: [{ title: 'Guest Lecture', date: 'Nov 20, 2025' }] },
+      { id: 'g10', name: 'Reading Area', type: 'Amenity', capacity: 15, cssArea: '5 / 8 / 7 / 11', events: [] },
+      { id: 'g11', name: 'Seating Area', type: 'Common', capacity: 25, cssArea: '6 / 1 / 8 / 3', events: [] },
+      { id: 'g12', name: 'Info Desk', type: 'Office', capacity: 4, cssArea: '7 / 8 / 8 / 11', events: [] },
+      { id: 'g13', name: 'Main Entrance', type: 'Common', capacity: 40, cssArea: '8 / 1 / 9 / 11', events: [] }
     ]
   },
   mezzanine: {
@@ -86,12 +92,9 @@ const FLOOR_DATA = {
     short: 'MZ',
     level: 0.5,
     totalArea: '320 m²',
-    gridTemplate: { rows: 3, cols: 3 },
+    gridTemplate: { rows: 1, cols: 1 },
     rooms: [
-      { id: 'm1', name: 'Open Workspace', type: 'Office', capacity: 25, cssArea: '1 / 1 / 3 / 3', events: [] },
-      { id: 'm2', name: 'Phone Booths', type: 'Meeting', capacity: 4, cssArea: '1 / 3 / 2 / 4', events: [] },
-      { id: 'm3', name: 'Quiet Zone', type: 'Office', capacity: 10, cssArea: '2 / 3 / 4 / 4', events: [{ title: 'Focus Hours', date: 'Daily' }] },
-      { id: 'm4', name: 'Lounge', type: 'Amenity', capacity: 15, cssArea: '3 / 1 / 4 / 3', events: [] }
+      { id: 'm1', name: 'Corridor', type: 'Common', capacity: 50, cssArea: '1 / 1 / 2 / 2', events: [] }
     ]
   },
   first: {

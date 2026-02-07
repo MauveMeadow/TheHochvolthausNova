@@ -456,63 +456,7 @@ const ConceptStory = () => {
         </div>
       </div>
 
-      {/* Vision Section - Challenge & Approach */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="mt-20"
-      >
-        <h2 className="mb-8 text-center">A Vision for Sustainable Development</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-4"
-              style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #1a3a8a 100%)' }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <path d="M12 17h.01"></path>
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-3 text-primary">The Challenge</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              The Hochvolthaus, originally constructed between 1957 and 1963 as a high-voltage research 
-              facility, stands as a landmark of post-war technical architecture. Today, it presents a unique 
-              opportunity to demonstrate how historic engineering buildings can be repurposed into dynamic 
-              educational environments.
-            </p>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-4"
-              style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #1a3a8a 100%)' }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                <path d="m9 12 2 2 4-4"></path>
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold mb-3 text-primary">Our Approach</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              This redesign project represents a fundamental shift in how we approach urban architecture. 
-              By integrating cutting-edge sustainable technologies with timeless design principles, we're 
-              creating a space that serves both present needs and future generations while preserving the 
-              building's architectural legacy.
-            </p>
-          </motion.div>
-        </div>
-      </motion.div>
+
     </div>
   )
 }
