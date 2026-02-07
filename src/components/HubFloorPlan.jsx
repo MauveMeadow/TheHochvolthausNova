@@ -132,14 +132,14 @@ const FLOOR_DATA = {
     short: 'SE',
     level: 2,
     totalArea: '720 m²',
-    gridTemplate: { rows: 4, cols: 4 },
+    gridTemplate: { rows: 4, cols: 3 },
     rooms: [
-      { id: 's1', name: 'Conference Hall', type: 'Meeting', capacity: 60, cssArea: '1 / 1 / 3 / 3', events: [{ title: 'Quarterly Review', date: 'Nov 25, 2025' }, { title: 'Town Hall', date: 'Dec 1, 2025' }] },
-      { id: 's2', name: 'Boardroom', type: 'Meeting', capacity: 16, cssArea: '1 / 3 / 2 / 5', events: [{ title: 'Board Meeting', date: 'Nov 18, 2025' }] },
-      { id: 's3', name: 'Executive Suite', type: 'Office', capacity: 5, cssArea: '2 / 3 / 3 / 5', events: [] },
-      { id: 's4', name: 'Training Room', type: 'Meeting', capacity: 30, cssArea: '3 / 1 / 5 / 3', events: [{ title: 'New Hire Onboarding', date: 'Nov 14, 2025' }] },
-      { id: 's5', name: 'Media Room', type: 'Amenity', capacity: 12, cssArea: '3 / 3 / 4 / 5', events: [] },
-      { id: 's6', name: 'Wellness Room', type: 'Amenity', capacity: 6, cssArea: '4 / 3 / 5 / 5', events: [] }
+      { id: 's1', name: 'Conference Hall', type: 'Meeting', capacity: 60, cssArea: '1 / 1 / 3 / 2', events: [{ title: 'Quarterly Review', date: 'Nov 25, 2025' }, { title: 'Town Hall', date: 'Dec 1, 2025' }] },
+      { id: 's2', name: 'Boardroom', type: 'Meeting', capacity: 16, cssArea: '1 / 2 / 2 / 4', events: [{ title: 'Board Meeting', date: 'Nov 18, 2025' }] },
+      { id: 's3', name: 'Executive Suite', type: 'Office', capacity: 5, cssArea: '2 / 2 / 3 / 4', events: [] },
+      { id: 's4', name: 'Training Room', type: 'Meeting', capacity: 30, cssArea: '3 / 1 / 5 / 2', events: [{ title: 'New Hire Onboarding', date: 'Nov 14, 2025' }] },
+      { id: 's5', name: 'Media Room', type: 'Amenity', capacity: 12, cssArea: '3 / 2 / 4 / 3', events: [] },
+      { id: 's6', name: 'Wellness Room', type: 'Amenity', capacity: 6, cssArea: '4 / 2 / 5 / 4', events: [] }
     ]
   },
   third: {
@@ -148,14 +148,24 @@ const FLOOR_DATA = {
     short: 'TH',
     level: 3,
     totalArea: '580 m²',
-    gridTemplate: { rows: 3, cols: 4 },
+    gridTemplate: { rows: 5, cols: 5 },
     rooms: [
-      { id: 't1', name: 'Research Lab', type: 'Lab', capacity: 15, cssArea: '1 / 1 / 2 / 3', events: [{ title: 'Lab Safety Training', date: 'Nov 16, 2025' }] },
-      { id: 't2', name: 'Testing Area', type: 'Lab', capacity: 8, cssArea: '1 / 3 / 2 / 5', events: [] },
-      { id: 't3', name: 'Equipment Storage', type: 'Storage', capacity: 4, cssArea: '2 / 1 / 3 / 2', events: [] },
-      { id: 't4', name: 'Analysis Room', type: 'Lab', capacity: 6, cssArea: '2 / 2 / 3 / 4', events: [{ title: 'Data Analysis Session', date: 'Nov 13, 2025' }] },
-      { id: 't5', name: 'Clean Room', type: 'Lab', capacity: 4, cssArea: '2 / 4 / 4 / 5', events: [] },
-      { id: 't6', name: 'Prep Area', type: 'Utility', capacity: 3, cssArea: '3 / 1 / 4 / 4', events: [] }
+      { id: 't1', name: 'Play Room', type: 'Amenity', capacity: 20, cssArea: '1 / 1 / 3 / 2', events: [] },
+      { id: 't2', name: 'Room 1', type: 'Office', capacity: 6, cssArea: '1 / 2 / 2 / 3', events: [] },
+      { id: 't3', name: 'Room 2', type: 'Office', capacity: 6, cssArea: '1 / 3 / 2 / 4', events: [] },
+      { id: 't4', name: 'Room 3', type: 'Office', capacity: 6, cssArea: '1 / 4 / 2 / 5', events: [] },
+      { id: 't5', name: 'Room 4', type: 'Office', capacity: 6, cssArea: '1 / 5 / 2 / 6', events: [] },
+      { id: 't6', name: 'Corridor', type: 'Common', capacity: 30, cssArea: '2 / 2 / 3 / 6', events: [] },
+      { id: 't7', name: 'Reading Room', type: 'Amenity', capacity: 12, cssArea: '3 / 1 / 4 / 2', events: [] },
+      { id: 't8', name: 'Meeting Room 1', type: 'Meeting', capacity: 8, cssArea: '3 / 2 / 4 / 3', events: [{ title: 'Team Meeting', date: 'Nov 12, 2025' }] },
+      { id: 't9', name: 'Meeting Room 5', type: 'Meeting', capacity: 8, cssArea: '3 / 5 / 4 / 6', events: [] },
+      { id: 't10', name: 'Meeting Room 2', type: 'Meeting', capacity: 8, cssArea: '4 / 1 / 5 / 2', events: [] },
+      { id: 't11', name: 'Meeting Room 3', type: 'Meeting', capacity: 8, cssArea: '4 / 2 / 5 / 3', events: [{ title: 'Design Review', date: 'Nov 19, 2025' }] },
+      { id: 't12', name: 'Meeting Room 6', type: 'Meeting', capacity: 8, cssArea: '4 / 5 / 5 / 6', events: [{ title: 'Budget Meeting', date: 'Nov 21, 2025' }] },
+      { id: 't13', name: 'Meeting Room 4', type: 'Meeting', capacity: 8, cssArea: '5 / 1 / 6 / 2', events: [] },
+      { id: 't14', name: 'Meeting Room 7', type: 'Meeting', capacity: 10, cssArea: '5 / 2 / 6 / 4', events: [] },
+      { id: 't15', name: 'Meeting Room 8', type: 'Meeting', capacity: 10, cssArea: '5 / 4 / 6 / 5', events: [] },
+      { id: 't16', name: 'Office Area', type: 'Office', capacity: 15, cssArea: '5 / 5 / 6 / 6', events: [] }
     ]
   },
   roof: {
