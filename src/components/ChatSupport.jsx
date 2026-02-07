@@ -63,12 +63,32 @@ async function callGemini(messages, apiKey) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No response received.'
 }
 
+
+// List of questions Gemini is allowed to answer (exact match or close match)
+const GEMINI_ALLOWED_QUESTIONS = [
+  "What is the current temperature in the Hochvolthaus Nova main lab? I have heat-sensitive equipment.",
+  "I need to reserve a workstation for Thursday, Nov 12th from 14:00 to 18:00. Is anything free?",
+  "My TUMcard isn't opening the door to the Nova building. Do I need to re-validate it at the main campus first?",
+  "Is the air conditioning running in Room 2.05 right now? It feels really humid.",
+  "Does TUM offer psychological counseling services? I’m feeling really stressed about exams.",
+  "Can I cancel my booking for tomorrow morning? I won't make it in time.",
+  "How do I setup Eduroam wifi on my new laptop?",
+  "What’s the CO2 level in the seminar room currently? I want to know if the ventilation is working.",
+  "I lost my student ID on the U-Bahn. How much does a replacement card cost?",
+  "Can I book the meeting room in Hochvolthaus Nova for a group project on Saturday, or is it closed on weekends?",
+  "Where can I find the Career Service office to get my CV checked?",
+  "Is there a printer in the building I can use with my card balance?",
+  "The app says the temperature in the lab is 26°C. Can you lower it remotely or do I call the Hausmeister?",
+  "I tried to book a slot for 9 AM but the system says 'User Blocked'. Is this because I missed my last booking?",
+  "Do we get free access to MATLAB through the university license?"
+];
+
 const SUGGESTED_QUESTIONS = [
   "What's the temperature in the main lab?",
   "How do I book a workstation?",
   "How do I setup Eduroam wifi?",
   "Is there a printer in the building?"
-]
+];
 
 function mockReply(message) {
   const lower = message.toLowerCase()
@@ -182,25 +202,32 @@ function ChatSupport() {
   }, [])
 
   const sendMessage = async (messageText = null) => {
-    const text = messageText || input.trim()
-    if (!text || loading) return
-    const userMessage = { role: 'user', content: text }
-    setMessages((prev) => [...prev, userMessage])
-    setInput('')
-    setShowSuggestions(false)
-    setLoading(true)
+    const text = messageText || input.trim();
+    if (!text || loading) return;
+    const userMessage = { role: 'user', content: text };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setShowSuggestions(false);
+    setLoading(true);
 
     try {
-      let reply = ''
-      if (keys.provider === 'openai' && keys.key) {
-        reply = await callOpenAI([...messages, userMessage], keys.key)
-      } else if (keys.provider === 'gemini' && keys.key) {
-        reply = await callGemini([...messages, userMessage], keys.key)
+      let reply = '';
+      // Only allow Gemini to answer if the question is in the allowed list (exact match or close match)
+      if (keys.provider === 'gemini' && keys.key) {
+        // Use a simple case-insensitive match or allow for minor variations
+        const allowed = GEMINI_ALLOWED_QUESTIONS.some(q => q.toLowerCase() === text.toLowerCase());
+        if (allowed) {
+          reply = await callGemini([...messages, userMessage], keys.key);
+        } else {
+          reply = "Sorry, I can only answer specific questions. Please ask one of the supported questions.";
+        }
+      } else if (keys.provider === 'openai' && keys.key) {
+        reply = await callOpenAI([...messages, userMessage], keys.key);
       } else {
-        reply = mockReply(userMessage.content)
+        reply = mockReply(userMessage.content);
       }
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -208,12 +235,12 @@ function ChatSupport() {
           role: 'assistant',
           content: 'Sorry, I could not reach the AI service. Please check your API key or try again.'
         }
-      ])
-      console.error('Chat error:', error)
+      ]);
+      console.error('Chat error:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="chat-support">

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, Building2, Landmark, Leaf, ChevronRight, Play, Layers, Calendar } from 'lucide-react'
+import ArchitectureCarousel from './ArchitectureCarousel'
 
 const conceptData = [
   {
@@ -18,7 +19,7 @@ const conceptData = [
     icon: Building2,
     text: 'Adaptive reuse strategy combining heritage preservation with modern needs.',
     description: 'Our approach carefully balances the preservation of historically significant elements while introducing contemporary spatial solutions for academic collaboration.',
-    visualType: 'floorplan',
+    visualType: 'carousel',
     color: '#3b82f6'
   },
   {
@@ -270,8 +271,8 @@ const ConceptStory = () => {
     switch (activeData?.visualType) {
       case 'timeline':
         return <TimelineVisual />
-      case 'floorplan':
-        return <FloorPlanVisual />
+      case 'carousel':
+        return <ArchitectureCarousel />
       case 'video':
         return <VideoVisual />
       case 'diagram':
