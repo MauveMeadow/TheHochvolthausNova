@@ -63,7 +63,6 @@ function TheMinds() {
               <div className="team-member-avatar">
                 <User size={64} />
               </div>
-              <h3>{member.name}</h3>
               <div className="role">{member.role}</div>
               <div className="team-member-links">
                 <a 
