@@ -25,18 +25,6 @@ const teamMembers = [
     role: "ITBE Master's Student",
     email: 'tianzhuo.wang@tum.de',
     linkedin: 'https://www.linkedin.com'
-  },
-  {
-    name: 'Chandana Mahesh',
-    role: "ITBE Master's Student",
-    email: 'chandana.mahesh@tum.de',
-    linkedin: 'https://www.linkedin.com/in/chandana-mahesh'
-  },
-  {
-    name: 'Antonia-Ioulia Pozatzidou',
-    role: "ITBE Master's Student",
-    email: 'antonia.pozatzidou@tum.de',
-    linkedin: 'https://www.linkedin.com/in/antonia-pozatzidou'
   }
 ]
 
