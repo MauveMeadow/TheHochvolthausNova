@@ -28,10 +28,6 @@ function Overview() {
             Architectural Redesign 2025
           </motion.div>
           
-          <h1 className="mb-12">
-            The Hochvolthaus Nova
-          </h1>
-          
           {/* Building Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
