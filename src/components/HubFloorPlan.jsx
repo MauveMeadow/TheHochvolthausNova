@@ -173,13 +173,29 @@ const FLOOR_DATA = {
     name: 'Roof',
     short: 'RF',
     level: 4,
-    totalArea: '400 m²',
-    gridTemplate: { rows: 3, cols: 3 },
+    totalArea: '850 m²',
+    gridTemplate: { rows: 6, cols: 7 },
     rooms: [
-      { id: 'r1', name: 'Rooftop Garden', type: 'Amenity', capacity: 40, cssArea: '1 / 1 / 3 / 3', events: [{ title: 'Summer BBQ', date: 'Jul 15, 2026' }] },
-      { id: 'r2', name: 'Solar Panel Array', type: 'Utility', capacity: 0, cssArea: '1 / 3 / 2 / 4', events: [] },
-      { id: 'r3', name: 'HVAC Units', type: 'Utility', capacity: 0, cssArea: '2 / 3 / 3 / 4', events: [{ title: 'HVAC Maintenance', date: 'Nov 22, 2025' }] },
-      { id: 'r4', name: 'Observation Deck', type: 'Amenity', capacity: 20, cssArea: '3 / 1 / 4 / 4', events: [] }
+      { id: 'r1', name: 'Rooftop Lounge', type: 'Amenity', capacity: 30, cssArea: '1 / 1 / 3 / 2', events: [{ title: 'Sunset Party', date: 'Jul 20, 2026' }] },
+      { id: 'r2', name: 'Office 1', type: 'Office', capacity: 6, cssArea: '1 / 2 / 2 / 3', events: [] },
+      { id: 'r3', name: 'Office 2', type: 'Office', capacity: 6, cssArea: '1 / 3 / 2 / 4', events: [] },
+      { id: 'r4', name: 'Office 3', type: 'Office', capacity: 6, cssArea: '1 / 4 / 2 / 5', events: [] },
+      { id: 'r5', name: 'Office 4', type: 'Office', capacity: 8, cssArea: '1 / 5 / 2 / 8', events: [] },
+      { id: 'r6', name: 'Core Area', type: 'Common', capacity: 30, cssArea: '2 / 2 / 3 / 6', events: [] },
+      { id: 'r7', name: 'Terrace Seating', type: 'Amenity', capacity: 25, cssArea: '2 / 6 / 3 / 8', events: [] },
+      { id: 'r8', name: 'Meeting Room 1', type: 'Meeting', capacity: 8, cssArea: '3 / 1 / 4 / 2', events: [] },
+      { id: 'r9', name: 'Meeting Room 2', type: 'Meeting', capacity: 8, cssArea: '3 / 2 / 4 / 3', events: [] },
+      { id: 'r10', name: 'Meeting Room 3', type: 'Meeting', capacity: 8, cssArea: '4 / 1 / 5 / 2', events: [] },
+      { id: 'r11', name: 'Meeting Room 4', type: 'Meeting', capacity: 8, cssArea: '4 / 2 / 5 / 3', events: [] },
+      { id: 'r12', name: 'Meeting Room 5', type: 'Meeting', capacity: 8, cssArea: '5 / 1 / 6 / 2', events: [] },
+      { id: 'r13', name: 'Meeting Room 6', type: 'Meeting', capacity: 8, cssArea: '5 / 2 / 6 / 3', events: [] },
+      { id: 'r14', name: 'Meeting Room 7', type: 'Meeting', capacity: 10, cssArea: '3 / 3 / 4 / 6', events: [{ title: 'Team Meeting', date: 'Feb 15, 2026' }] },
+      { id: 'r15', name: 'Meeting Room 8', type: 'Meeting', capacity: 10, cssArea: '4 / 3 / 5 / 6', events: [] },
+      { id: 'r16', name: 'Meeting Room 9', type: 'Meeting', capacity: 10, cssArea: '5 / 3 / 6 / 6', events: [] },
+      { id: 'r17', name: 'Office Space 1', type: 'Office', capacity: 12, cssArea: '3 / 6 / 4 / 8', events: [] },
+      { id: 'r18', name: 'Office Space 2', type: 'Office', capacity: 12, cssArea: '4 / 6 / 5 / 8', events: [] },
+      { id: 'r19', name: 'Office Space 3', type: 'Office', capacity: 12, cssArea: '5 / 6 / 6 / 8', events: [] },
+      { id: 'r20', name: 'Observation Deck', type: 'Amenity', capacity: 50, cssArea: '6 / 1 / 7 / 8', events: [{ title: 'City View Event', date: 'Aug 1, 2026' }] }
     ]
   }
 }
