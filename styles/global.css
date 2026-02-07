@@ -368,6 +368,33 @@ p {
   padding: 0.5rem 0.75rem 0.9rem;
   font-size: 0.82rem;
   color: var(--muted-foreground);
+}
+
+/* Chat Suggested Questions */
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.chat-suggestion-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.chat-suggestion-btn:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
   background: var(--card);
   border-top: 1px solid var(--border);
 }

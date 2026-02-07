@@ -63,28 +63,113 @@ async function callGemini(messages, apiKey) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'No response received.'
 }
 
+const SUGGESTED_QUESTIONS = [
+  "What's the temperature in the main lab?",
+  "How do I book a workstation?",
+  "How do I setup Eduroam wifi?",
+  "Is there a printer in the building?"
+]
+
 function mockReply(message) {
   const lower = message.toLowerCase()
+  
+  // Temperature & Climate
+  if (lower.includes('temperature') || lower.includes('temp')) {
+    if (lower.includes('lab') || lower.includes('main')) {
+      return 'The current temperature in the Hochvolthaus Nova main lab is 22.4°C. This is within the recommended range for most equipment. If you have heat-sensitive equipment requiring lower temps, consider Room 1.08 (cold storage lab) at 18°C.'
+    }
+    if (lower.includes('lower') || lower.includes('26') || lower.includes('hausmeister')) {
+      return 'For temperature adjustments, you can submit a request through the TUM Facility Management portal or call the Hausmeister directly at +49 89 289-22222. Remote adjustments take 15-30 minutes to take effect.'
+    }
+    return 'Current building temperature is 22°C. You can check room-specific temperatures in the Model Explorer section under "Environmental Data".'
+  }
+  
+  // Humidity & Air Quality
+  if (lower.includes('humid') || lower.includes('air condition') || lower.includes('ac ') || lower.includes('a/c')) {
+    return 'The HVAC system in Room 2.05 is currently running. Humidity is at 45% (normal range: 40-60%). If it feels uncomfortable, the system may need 10-15 minutes to stabilize after recent occupancy changes.'
+  }
+  
+  if (lower.includes('co2') || lower.includes('ventilation')) {
+    return 'Current CO2 level in the seminar room is 620 ppm (excellent - below 800 ppm is ideal). The ventilation system is operating normally with air exchange rate of 6 ACH.'
+  }
+  
+  // Room Reservations & Bookings
+  if (lower.includes('reserve') || lower.includes('book') || lower.includes('workstation')) {
+    if (lower.includes('cancel')) {
+      return 'To cancel a booking, go to TUMonline → My Bookings → select your reservation → Cancel. Cancellations must be made at least 2 hours before the slot. Need help with a specific booking?'
+    }
+    if (lower.includes('blocked') || lower.includes('missed')) {
+      return 'Your account may be temporarily blocked if you missed 2+ bookings without canceling. Contact the facility manager at nova-support@tum.de to resolve this. Blocks are usually lifted within 24 hours after confirmation.'
+    }
+    if (lower.includes('weekend') || lower.includes('saturday') || lower.includes('sunday')) {
+      return 'Hochvolthaus Nova is open on weekends from 8:00-20:00. Meeting rooms can be booked through TUMonline. Note: Some specialized labs require supervisor approval for weekend access.'
+    }
+    if (lower.includes('thursday') || lower.includes('14:00') || lower.includes('18:00')) {
+      return 'Checking availability for Thursday 14:00-18:00... Workstations 3, 5, and 7 are available in the main lab. You can book directly through TUMonline → Room Reservations → Hochvolthaus Nova.'
+    }
+    return 'To reserve a workstation: Go to TUMonline → Room Reservations → Select "Hochvolthaus Nova" → Choose your date and time. Bookings can be made up to 2 weeks in advance.'
+  }
+  
+  // TUMcard & Access
+  if (lower.includes('tumcard') || lower.includes('card') || lower.includes('door') || lower.includes('access')) {
+    if (lower.includes('lost') || lower.includes('replacement')) {
+      return 'Lost TUMcard replacement costs €20 and takes 3-5 business days. Report it immediately at studentenkanzlei@tum.de to block the old card. You can get a temporary access card from the InfoPoint.'
+    }
+    if (lower.includes('validate') || lower.includes('open') || lower.includes('isn\'t')) {
+      return 'If your TUMcard isn\'t working, first try re-validating at any validation terminal on campus. If still not working, visit the Student Service Desk at the main campus. New semester validation is required every 6 months.'
+    }
+    return 'TUMcard issues? Try re-validating at a terminal first. For persistent problems, contact the IT Service Desk or visit the Student Service Center.'
+  }
+  
+  // University Services
+  if (lower.includes('psychological') || lower.includes('counseling') || lower.includes('stress') || lower.includes('mental')) {
+    return 'Yes! TUM offers free psychological counseling through the Studierendenwerk. Book appointments at www.studierendenwerk-muenchen-oberbayern.de/beratung or call 089-38196-1000. Emergency support is also available 24/7.'
+  }
+  
+  if (lower.includes('career') || lower.includes('cv') || lower.includes('resume')) {
+    return 'The TUM Career Service is located at Arcisstraße 21 (main campus). They offer free CV reviews - book online at www.tum.de/career. Drop-in hours are Tue & Thu 10:00-12:00.'
+  }
+  
+  // Technical & IT
+  if (lower.includes('eduroam') || lower.includes('wifi') || lower.includes('wi-fi')) {
+    return 'To setup Eduroam: 1) Go to cat.eduroam.org 2) Download the TUM installer 3) Run it and enter your TUM credentials (username@tum.de). For manual setup, use PEAP/MSCHAPv2 with your LRZ credentials.'
+  }
+  
+  if (lower.includes('printer') || lower.includes('print')) {
+    return 'Yes! There are 2 printers on the ground floor near the entrance. Use your TUMcard to authenticate. Printing costs: €0.04/page B&W, €0.15/page color. Add credit via TUMonline → Print Account.'
+  }
+  
+  if (lower.includes('matlab') || lower.includes('software') || lower.includes('license')) {
+    return 'Yes, TUM provides free MATLAB access through the campus license. Download from www.matlab.mathworks.com using your TUM email. Also available: Microsoft Office, Adobe CC, and many more at software.tum.de.'
+  }
+  
+  // IFC & 3D Models
   if (lower.includes('ifc')) {
-    return 'IFC is the Building Information Modeling schema we use for the Hochvolthaus models. The site hosts an IFC tab for BIM insights.'
+    return 'IFC (Industry Foundation Classes) is the BIM schema we use for the Hochvolthaus models. Explore the building data in the Model Explorer section to see structural elements, MEP systems, and spatial data.'
   }
+  
   if (lower.includes('point cloud')) {
-    return 'Point Cloud covers LiDAR/photogrammetry data. Use the Point Cloud tab to explore that dataset when it is available.'
+    return 'Point Cloud data from LiDAR scanning is available in the Model Explorer. This captures the as-built condition of the Hochvolthaus with millimeter accuracy.'
   }
-  if (lower.includes('navigate') || lower.includes('section')) {
-    return 'Use the top navigation: Overview, Concept, Hub, 3D Models, and Minds. Scroll or click a tab to jump.'
+  
+  // Navigation
+  if (lower.includes('navigate') || lower.includes('section') || lower.includes('where')) {
+    return 'Use the top navigation bar to explore: Overview (project intro), Concept (design vision), The Hub (facilities), Model Explorer (3D/BIM), and The Minds (team). Click any section or scroll to navigate.'
   }
-  return 'This is demo mode. Add VITE_OPENAI_API_KEY or VITE_GEMINI_API_KEY to get live answers.'
+  
+  // Default response
+  return 'I can help with questions about Hochvolthaus Nova including: room bookings, building conditions (temperature, CO2), TUM services, technical setup (Eduroam, printers), and the 3D building model. What would you like to know?'
 }
 
 function ChatSupport() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(true)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hi! I can answer questions about Hochvolthaus, the 3D models, and how to navigate the site.'
+      content: 'Hi! I can help with questions about Hochvolthaus Nova - room bookings, building conditions, TUM services, and navigating the 3D model. What would you like to know?'
     }
   ])
 
@@ -96,11 +181,13 @@ function ChatSupport() {
     return { provider: 'mock', key: null }
   }, [])
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return
-    const userMessage = { role: 'user', content: input.trim() }
+  const sendMessage = async (messageText = null) => {
+    const text = messageText || input.trim()
+    if (!text || loading) return
+    const userMessage = { role: 'user', content: text }
     setMessages((prev) => [...prev, userMessage])
     setInput('')
+    setShowSuggestions(false)
     setLoading(true)
 
     try {
@@ -164,6 +251,19 @@ function ChatSupport() {
                 <p>{msg.content}</p>
               </div>
             ))}
+            {showSuggestions && messages.length === 1 && (
+              <div className="chat-suggestions">
+                {SUGGESTED_QUESTIONS.map((question, idx) => (
+                  <button
+                    key={idx}
+                    className="chat-suggestion-btn"
+                    onClick={() => sendMessage(question)}
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
             {loading && (
               <div className="chat-message assistant">
                 <div className="chat-typing">
