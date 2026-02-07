@@ -80,35 +80,6 @@ function Models3D() {
           </motion.div>
         )}
 
-        {/* Features List */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div className="card">
-            <h3 className="mb-3">3DCityDB Features</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• CityGML data integration</li>
-              <li>• Geospatial visualization</li>
-              <li>• Urban context analysis</li>
-              <li>• Multi-level detail (LOD) support</li>
-            </ul>
-          </div>
-
-          <div className="card">
-            <h3 className="mb-3">IFC.js Capabilities</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Building Information Modeling</li>
-              <li>• Material property analysis</li>
-              <li>• Structural element inspection</li>
-              <li>• Quantity take-offs</li>
-            </ul>
-          </div>
-        </motion.div>
-
         {/* Technical Note */}
         <motion.div
           initial={{ opacity: 0 }}
