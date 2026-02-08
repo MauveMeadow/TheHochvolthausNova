@@ -118,7 +118,7 @@ const DashboardToggle = ({ onSelectItem }) => {
           >
             {activeCategory === 'building' 
               ? 'Model Analysis (IFC) & Environmental Studies (FORMA)'
-              : 'City Database (Cesium) & Spatial Analysis (ArcGIS)'
+              : 'Spatial Analysis (ArcGIS) and City Database (Cesium)'
             }
           </motion.p>
         </AnimatePresence>
