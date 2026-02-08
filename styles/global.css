@@ -935,6 +935,13 @@ p {
   text-decoration: none !important;
 }
 
+/* Contact link in navigation */
+.contact-link {
+  color: var(--foreground) !important;
+  font-weight: var(--font-weight-normal);
+  text-decoration: none !important;
+}
+
 /* ========================================
    Room Reservation Page Styles
    ======================================== */
