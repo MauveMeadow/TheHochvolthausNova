@@ -36,6 +36,9 @@ function Navigation({ activeTab, onTabChange }) {
               <Link to="/reservations" className="tab reservations-link">
                 Reservations
               </Link>
+              <Link to="/contact" className="tab contact-link">
+                Contact
+              </Link>
               <Link to="/signin" className="btn btn-primary signin-btn">
                 Sign In
               </Link>
@@ -81,6 +84,13 @@ function Navigation({ activeTab, onTabChange }) {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Reservations
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-secondary"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
             </Link>
             <Link 
               to="/signin" 
