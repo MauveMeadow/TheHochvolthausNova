@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import { Mail, Phone, MapPin, Send, ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -64,6 +65,11 @@ function Contact() {
   return (
     <div className="min-h-screen pt-20 pb-20">
       <div className="container">
+        <Link to="/" className="flex items-center space-x-2 mb-8 text-foreground hover:opacity-70 transition-opacity">
+          <ArrowLeft size={20} />
+          <span>Back to Home</span>
+        </Link>
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
