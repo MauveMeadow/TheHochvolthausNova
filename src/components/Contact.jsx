@@ -65,7 +65,7 @@ function Contact() {
   return (
     <div className="min-h-screen pt-20 pb-20">
       <div className="container">
-        <Link to="/" className="flex items-center space-x-2 mb-8 text-foreground hover:opacity-70 transition-opacity">
+        <Link to="/" className="btn btn-secondary mb-8 w-fit">
           <ArrowLeft size={20} />
           <span>Back to Home</span>
         </Link>
