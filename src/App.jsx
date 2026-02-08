@@ -7,6 +7,7 @@ import Overview from './components/Overview'
 import TheConcept from './components/TheConcept'
 import TheHub from './components/TheHub'
 import Models3D from './components/Models3D'
+import TheExchange from './components/TheExchange'
 import ChatSupport from './components/ChatSupport'
 import HistoryPage from './components/HistoryPage'
 import SignIn from './components/SignIn'
@@ -24,13 +25,15 @@ function App() {
   const conceptRef = useRef(null)
   const hubRef = useRef(null)
   const modelsRef = useRef(null)
+  const exchangeRef = useRef(null)
 
   const scrollToSection = (sectionId) => {
     const refs = {
       overview: overviewRef,
       concept: conceptRef,
       hub: hubRef,
-      models: modelsRef
+      models: modelsRef,
+      exchange: exchangeRef
     }
     
     const ref = refs[sectionId]
@@ -58,7 +61,7 @@ function App() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions)
 
-    const sections = [overviewRef, conceptRef, hubRef, modelsRef]
+    const sections = [overviewRef, conceptRef, hubRef, modelsRef, exchangeRef]
     sections.forEach((ref) => {
       if (ref.current) {
         observer.observe(ref.current)
@@ -107,6 +110,10 @@ function App() {
 
                   <section ref={modelsRef} data-section="models" className="section">
                     <Models3D />
+                  </section>
+
+                  <section ref={exchangeRef} data-section="exchange" className="section">
+                    <TheExchange />
                   </section>
                 </main>
 

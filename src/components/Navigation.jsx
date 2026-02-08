@@ -8,7 +8,8 @@ const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'concept', label: 'The Concept' },
   { id: 'hub', label: 'The Hub' },
-  { id: 'models', label: 'Model Explorer' }
+  { id: 'models', label: 'Model Explorer' },
+  { id: 'exchange', label: 'The Exchange' }
 ]
 
 function Navigation({ activeTab, onTabChange }) {
