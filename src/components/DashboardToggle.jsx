@@ -35,7 +35,7 @@ const contentData = {
   urban: [
     {
       id: 'arcgis',
-      name: 'ArcGIS Analysis',
+      name: 'Analysis Zones',
       context: 'Spatial analysis',
       icon: Map,
       color: '#3b82f6'

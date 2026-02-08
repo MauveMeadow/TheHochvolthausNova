@@ -66,7 +66,7 @@ function Models3D() {
                   >
                     <Map className="w-12 h-12" />
                   </div>
-                  <h3 className="text-2xl mb-3">ArcGIS Analysis</h3>
+                  <h3 className="text-2xl mb-3">Analysis Zones</h3>
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                     Interactive mapping and spatial analysis tools
                   </p>
