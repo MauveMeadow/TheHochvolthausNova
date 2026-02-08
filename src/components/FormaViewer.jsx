@@ -536,9 +536,10 @@ const FormaViewer = () => {
         const ifcApi = new WebIFC.IfcAPI();
         ifcApiRef.current = ifcApi;
         
-        // Set WASM path
-        ifcApi.SetWasmPath('/wasm/');
-        console.log('WASM path set to /wasm/');
+        // Set WASM path - Use CDN for reliable loading
+        const wasmPath = 'https://unpkg.com/web-ifc@0.0.75/';
+        ifcApi.SetWasmPath(wasmPath);
+        console.log('WASM path set to:', wasmPath);
         
         setLoadingProgress('Loading WASM module...');
         await ifcApi.Init();
@@ -548,9 +549,11 @@ const FormaViewer = () => {
 
         // Fetch the FORMA IFC file
         setLoadingProgress('Fetching FORMA IFC file...');
-        console.log('Fetching /Forma.ifc...');
+        const basePath = import.meta.env.BASE_URL || '/';
+        const ifcFilePath = `${basePath}Forma.ifc`;
+        console.log('Fetching IFC file from:', ifcFilePath);
         
-        const response = await fetch('/Forma.ifc');
+        const response = await fetch(ifcFilePath);
         if (!response.ok) {
           throw new Error(`Failed to fetch IFC file: ${response.status} ${response.statusText}`);
         }
