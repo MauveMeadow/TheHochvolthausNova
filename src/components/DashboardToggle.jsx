@@ -42,7 +42,7 @@ const contentData = {
     },
     {
       id: 'cesium',
-      name: 'Cesium 3D City',
+      name: 'Volumetric Environment',
       context: '3D City Database',
       icon: Building2,
       color: '#f59e0b'
