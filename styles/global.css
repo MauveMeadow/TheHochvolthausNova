@@ -927,6 +927,7 @@ p {
   margin-left: 1rem;
   padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
+  white-space: nowrap;
 }
 
 /* Reservations link in navigation */
