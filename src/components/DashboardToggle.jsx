@@ -43,7 +43,7 @@ const contentData = {
     {
       id: 'cesium',
       name: 'Volumetric Environment',
-      context: '3D City Database',
+      context: 'Cesium',
       icon: Building2,
       color: '#f59e0b'
     }
