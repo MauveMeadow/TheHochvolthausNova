@@ -51,8 +51,8 @@ function Contact() {
     {
       icon: Phone,
       title: 'Phone',
-      content: '+49 (0) 89 289 28001',
-      href: 'tel:+498928928001'
+      content: '+49 (0) 0000000',
+      href: 'tel:+4900000000'
     },
     {
       icon: MapPin,
