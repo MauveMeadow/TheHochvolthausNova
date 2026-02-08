@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion'
 import { Briefcase, Megaphone, Users, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+import EventRegistration from './EventRegistration'
 
 function TheExchange() {
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false)
   const researchProjects = [
     {
       id: 1,
@@ -241,11 +244,21 @@ function TheExchange() {
                 Be part of a thriving community of researchers, innovators, and industry partners. 
                 Collaborate on cutting-edge projects and help shape the future of sustainable development at the Hochvolthaus.
               </p>
-              <button className="btn btn-primary">Get Involved</button>
+              <button 
+                onClick={() => setIsRegistrationOpen(true)}
+                className="btn btn-primary"
+              >
+                Get Involved
+              </button>
             </div>
           </div>
         </motion.div>
       </motion.div>
+
+      <EventRegistration 
+        isOpen={isRegistrationOpen} 
+        onClose={() => setIsRegistrationOpen(false)} 
+      />
     </div>
   )
 }
