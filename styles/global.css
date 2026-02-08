@@ -176,6 +176,7 @@ p {
   border: none;
   background: transparent;
   color: var(--foreground);
+  text-decoration: none;
 }
 
 .tab.active {
