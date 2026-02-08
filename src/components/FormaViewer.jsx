@@ -547,49 +547,89 @@ const FormaViewer = () => {
 
         if (disposedRef.current) return;
 
-        // Fetch the FORMA IFC file
-        setLoadingProgress('Fetching FORMA IFC file...');
+        // Fetch and load both FORMA IFC files
         const basePath = import.meta.env.BASE_URL || '/';
-        const ifcFilePath = `${basePath}Forma.ifc`;
-        console.log('Fetching IFC file from:', ifcFilePath);
+        const mainGroup = new THREE.Group();
         
-        const response = await fetch(ifcFilePath);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch IFC file: ${response.status} ${response.statusText}`);
+        // Load Forma.ifc (site/land model)
+        setLoadingProgress('Fetching site model...');
+        const formaPath = `${basePath}Forma.ifc`;
+        console.log('Fetching site model from:', formaPath);
+        
+        const formaResponse = await fetch(formaPath);
+        if (!formaResponse.ok) {
+          throw new Error(`Failed to fetch Forma.ifc: ${formaResponse.status}`);
         }
         
-        const ifcData = await response.arrayBuffer();
-        console.log(`FORMA IFC file fetched: ${ifcData.byteLength} bytes`);
+        const formaData = await formaResponse.arrayBuffer();
+        console.log(`Site model fetched: ${formaData.byteLength} bytes`);
 
         if (disposedRef.current) return;
 
-        // Open the IFC model
-        setLoadingProgress('Parsing FORMA IFC file...');
-        console.log('Opening FORMA IFC model...');
+        // Open the site model
+        setLoadingProgress('Loading site model geometry...');
+        console.log('Opening site model...');
         
-        const modelID = ifcApi.OpenModel(new Uint8Array(ifcData));
-        modelIDRef.current = modelID;
-        console.log(`FORMA IFC model opened with ID: ${modelID}`);
+        const formaModelID = ifcApi.OpenModel(new Uint8Array(formaData));
+        console.log(`Site model opened with ID: ${formaModelID}`);
 
-        if (disposedRef.current) return;
-
-        // Create mesh from IFC geometry
-        setLoadingProgress('Building 3D geometry...');
-        console.log('Building 3D geometry...');
-        
-        const modelGroup = await createThreeGeometry(ifcApi, modelID);
-        
         if (disposedRef.current) {
-          ifcApi.CloseModel(modelID);
+          ifcApi.CloseModel(formaModelID);
           return;
         }
 
-        // Add model to scene
-        scene.add(modelGroup);
-        console.log('FORMA Model added to scene');
+        // Create geometry for site model
+        const formaGroup = await createThreeGeometry(ifcApi, formaModelID);
+        mainGroup.add(formaGroup);
+        console.log('Site model added');
 
-        // Fit camera to model
-        fitCameraToModel(modelGroup, camera, controls);
+        // Load Hochvolthaus.ifc (building model)
+        setLoadingProgress('Fetching building model...');
+        const hochvoltPath = `${basePath}Hochvolthaus.ifc`;
+        console.log('Fetching building model from:', hochvoltPath);
+        
+        const hochvoltResponse = await fetch(hochvoltPath);
+        if (hochvoltResponse.ok) {
+          const hochvoltData = await hochvoltResponse.arrayBuffer();
+          console.log(`Building model fetched: ${hochvoltData.byteLength} bytes`);
+
+          if (disposedRef.current) {
+            ifcApi.CloseModel(formaModelID);
+            return;
+          }
+
+          // Open the building model
+          setLoadingProgress('Loading building model geometry...');
+          console.log('Opening building model...');
+          
+          const hochvoltModelID = ifcApi.OpenModel(new Uint8Array(hochvoltData));
+          console.log(`Building model opened with ID: ${hochvoltModelID}`);
+
+          if (disposedRef.current) {
+            ifcApi.CloseModel(formaModelID);
+            ifcApi.CloseModel(hochvoltModelID);
+            return;
+          }
+
+          // Create geometry for building model
+          const hochvoltGroup = await createThreeGeometry(ifcApi, hochvoltModelID);
+          mainGroup.add(hochvoltGroup);
+          console.log('Building model added');
+        } else {
+          console.log('Hochvolthaus.ifc not found, loading site model only');
+        }
+
+        if (disposedRef.current) {
+          ifcApi.CloseModel(formaModelID);
+          return;
+        }
+
+        // Add combined models to scene
+        scene.add(mainGroup);
+        console.log('All models added to scene');
+
+        // Fit camera to all models
+        fitCameraToModel(mainGroup, camera, controls);
 
         // NOTE: We keep the model open so we can query properties
         // Don't close: ifcApi.CloseModel(modelID);
