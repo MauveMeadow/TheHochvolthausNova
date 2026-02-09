@@ -18,6 +18,7 @@ import AnalysisViewer from './components/AnalysisViewer'
 import FormaAnalysisIntegration from './components/FormaAnalysisIntegration'
 import LocationMap from './components/LocationMap'
 import BuildingTimeline from './components/BuildingTimeline'
+import GetInvolved from './components/GetInvolved'
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -89,6 +90,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/location-map" element={<LocationMap />} />
           <Route path="/building-timeline" element={<BuildingTimeline />} />
+          <Route path="/get-involved" element={<GetInvolved />} />
           <Route path="/analysis" element={<AnalysisViewer />} />
           <Route path="/forma-analysis" element={<FormaAnalysisIntegration />} />
           <Route path="/" element={

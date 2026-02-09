@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
 import { Briefcase, Megaphone, Users, TrendingUp, Zap, Brain, Leaf, Radio, Calendar, Lightbulb, Shield, Share2 } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function TheExchange() {
+  const navigate = useNavigate()
   const [activeResearchTab, setActiveResearchTab] = useState(0)
   const [activeBulletinTab, setActiveBulletinTab] = useState(0)
   const researchProjects = [
@@ -338,7 +340,12 @@ function TheExchange() {
                 Be part of a thriving community of researchers, innovators, and industry partners. 
                 Collaborate on cutting-edge projects and help shape the future of sustainable development at the Hochvolthaus.
               </p>
-              <button className="btn btn-primary">Get Involved</button>
+              <button 
+                onClick={() => navigate('/get-involved')}
+                className="btn btn-primary"
+              >
+                Get Involved
+              </button>
             </div>
           </div>
         </motion.div>
