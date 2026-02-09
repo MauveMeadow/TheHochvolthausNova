@@ -42,6 +42,14 @@
   box-sizing: border-box;
 }
 
+button, .border-none {
+  border: none !important;
+  outline: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 html {
   font-size: var(--font-size);
   scroll-behavior: smooth;
