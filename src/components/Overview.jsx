@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 const stats = [
   { icon: Building2, label: 'Total Area', value: '9,730 m²' },
   { icon: Users, label: 'Capacity', value: '2,500 people' },
-  { icon: Calendar, label: 'Timeline', value: '24 months' },
+  { icon: Calendar, label: 'Timeline', value: '24 months', isClickable: true },
   { icon: MapPin, label: 'Location', value: 'Munich, Germany', isClickable: true }
 ]
 
@@ -73,13 +73,22 @@ function Overview() {
         >
         {stats.map((stat, index) => {
             const Icon = stat.icon
+            const handleClick = () => {
+              if (stat.isClickable) {
+                if (stat.label === 'Timeline') {
+                  navigate('/building-timeline')
+                } else if (stat.label === 'Location') {
+                  navigate('/location-map')
+                }
+              }
+            }
             return (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
-                onClick={() => stat.isClickable && navigate('/location-map')}
+                onClick={handleClick}
                 className={`card text-center ${stat.isClickable ? 'cursor-pointer hover:shadow-lg hover:scale-105 transition-all' : ''}`}
               >
                 <Icon className="w-10 h-10 mx-auto mb-4 text-primary" />
@@ -87,7 +96,7 @@ function Overview() {
                 <div className="text-2xl font-medium">{stat.value}</div>
                 {stat.isClickable && (
                   <div className="text-xs text-primary mt-2 font-semibold">
-                    Click to view map →
+                    Click to view →
                   </div>
                 )}
               </motion.div>

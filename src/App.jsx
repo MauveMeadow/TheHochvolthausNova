@@ -17,6 +17,7 @@ import Contact from './components/Contact'
 import AnalysisViewer from './components/AnalysisViewer'
 import FormaAnalysisIntegration from './components/FormaAnalysisIntegration'
 import LocationMap from './components/LocationMap'
+import BuildingTimeline from './components/BuildingTimeline'
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -87,6 +88,7 @@ function App() {
           <Route path="/reservations" element={<RoomReservation />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/location-map" element={<LocationMap />} />
+          <Route path="/building-timeline" element={<BuildingTimeline />} />
           <Route path="/analysis" element={<AnalysisViewer />} />
           <Route path="/forma-analysis" element={<FormaAnalysisIntegration />} />
           <Route path="/" element={
