@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion'
-import { Briefcase, Megaphone, Users, TrendingUp } from 'lucide-react'
+import { Briefcase, Megaphone, Users, TrendingUp, Zap, Brain, Leaf, Radio, Calendar, Lightbulb, Shield, Share2 } from 'lucide-react'
+import { useState } from 'react'
 
 function TheExchange() {
+  const [activeResearchTab, setActiveResearchTab] = useState(0)
+  const [activeBulletinTab, setActiveBulletinTab] = useState(0)
   const researchProjects = [
     {
       id: 1,
@@ -98,6 +101,16 @@ function TheExchange() {
     }
   }
 
+  const getResearchIcon = (index) => {
+    const icons = [Zap, Brain, Leaf, Radio]
+    return icons[index]
+  }
+
+  const getBulletinIcon = (index) => {
+    const icons = [Calendar, Lightbulb, Shield, Share2]
+    return icons[index]
+  }
+
   return (
     <div className="container">
       <motion.div
@@ -138,35 +151,77 @@ function TheExchange() {
             </div>
 
             <div className="space-y-4">
-              {researchProjects.map((project) => (
-                <motion.div
-                  key={project.id}
-                  variants={itemVariants}
-                  className="p-6 rounded-xl border border-border hover:border-blue-400/50 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-all duration-300 cursor-pointer group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl">{project.image}</div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {project.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">{project.lab}</p>
-                        </div>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          {project.status}
-                        </span>
+              {/* Research Tabs */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {researchProjects.map((project, index) => {
+                  const Icon = getResearchIcon(index)
+                  const isActive = activeResearchTab === index
+                  return (
+                    <motion.button
+                      key={project.id}
+                      onClick={() => setActiveResearchTab(index)}
+                      className="flex items-center gap-2 border-none cursor-pointer"
+                      style={{
+                        background: isActive 
+                          ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                          : 'var(--secondary)',
+                        color: isActive ? '#ffffff' : 'var(--muted-foreground)',
+                        border: 'none',
+                        outline: 'none',
+                        borderRadius: '1rem',
+                        padding: '0.875rem 1.25rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        boxShadow: isActive 
+                          ? '0 4px 20px rgba(37, 99, 235, 0.3)' 
+                          : '0 2px 8px rgba(0, 0, 0, 0.06)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        scale: 1.02,
+                        boxShadow: isActive 
+                          ? '0 6px 25px rgba(37, 99, 235, 0.4)' 
+                          : '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="whitespace-nowrap">{project.lab.split(' ')[0]}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+
+              {/* Research Content */}
+              <motion.div
+                key={activeResearchTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 rounded-xl border border-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="text-4xl">{researchProjects[activeResearchTab].image}</div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                          {researchProjects[activeResearchTab].title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">{researchProjects[activeResearchTab].lab}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{project.team}</span>
-                      </div>
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        {researchProjects[activeResearchTab].status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{researchProjects[activeResearchTab].description}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Users className="w-4 h-4" />
+                      <span>{researchProjects[activeResearchTab].team}</span>
                     </div>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
             </div>
           </motion.div>
 
@@ -189,39 +244,81 @@ function TheExchange() {
             </div>
 
             <div className="space-y-4">
-              {bulletinItems.map((item) => (
-                <motion.div
-                  key={item.id}
-                  variants={itemVariants}
-                  className="p-5 rounded-xl border border-border hover:border-orange-400/50 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 transition-all duration-300 cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-semibold group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors flex-1">
-                      {item.title}
-                    </h3>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${
-                      item.type === 'Event' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                      item.type === 'Workshop' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      item.type === 'Announcement' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    }`}>
-                      {item.type}
-                    </span>
+              {/* Bulletin Tabs */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {bulletinItems.map((item, index) => {
+                  const Icon = getBulletinIcon(index)
+                  const isActive = activeBulletinTab === index
+                  return (
+                    <motion.button
+                      key={item.id}
+                      onClick={() => setActiveBulletinTab(index)}
+                      className="flex items-center gap-2 border-none cursor-pointer"
+                      style={{
+                        background: isActive 
+                          ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
+                          : 'var(--secondary)',
+                        color: isActive ? '#ffffff' : 'var(--muted-foreground)',
+                        border: 'none',
+                        outline: 'none',
+                        borderRadius: '1rem',
+                        padding: '0.875rem 1.25rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        boxShadow: isActive 
+                          ? '0 4px 20px rgba(249, 115, 22, 0.3)' 
+                          : '0 2px 8px rgba(0, 0, 0, 0.06)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        scale: 1.02,
+                        boxShadow: isActive 
+                          ? '0 6px 25px rgba(249, 115, 22, 0.4)' 
+                          : '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="whitespace-nowrap">{item.type}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+
+              {/* Bulletin Content */}
+              <motion.div
+                key={activeBulletinTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 rounded-xl border border-orange-400/50 bg-orange-50/30 dark:bg-orange-950/20"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="font-semibold text-orange-600 dark:text-orange-400 flex-1">
+                    {bulletinItems[activeBulletinTab].title}
+                  </h3>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${
+                    bulletinItems[activeBulletinTab].type === 'Event' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
+                    bulletinItems[activeBulletinTab].type === 'Workshop' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                    bulletinItems[activeBulletinTab].type === 'Announcement' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  }`}>
+                    {bulletinItems[activeBulletinTab].type}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">{bulletinItems[activeBulletinTab].description}</p>
+                <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">📅</span>
+                    <span>{bulletinItems[activeBulletinTab].date}</span>
+                    {bulletinItems[activeBulletinTab].time && <span className="text-muted-foreground">at {bulletinItems[activeBulletinTab].time}</span>}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
-                  <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">📅</span>
-                      <span>{item.date}</span>
-                      {item.time && <span className="text-muted-foreground">at {item.time}</span>}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">📍</span>
-                      <span>{item.location}</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">📍</span>
+                    <span>{bulletinItems[activeBulletinTab].location}</span>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>

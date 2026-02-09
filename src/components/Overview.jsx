@@ -1,14 +1,16 @@
 import { motion } from 'framer-motion'
 import { Building2, MapPin, Calendar, Users } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const stats = [
   { icon: Building2, label: 'Total Area', value: '9,730 m²' },
   { icon: Users, label: 'Capacity', value: '2,500 people' },
   { icon: Calendar, label: 'Timeline', value: '24 months' },
-  { icon: MapPin, label: 'Location', value: 'Munich, Germany' }
+  { icon: MapPin, label: 'Location', value: 'Munich, Germany', isClickable: true }
 ]
 
 function Overview() {
+  const navigate = useNavigate()
   return (
     <div className="container">
       <motion.div
@@ -69,7 +71,7 @@ function Overview() {
           transition={{ delay: 0.4, duration: 0.8 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-16"
         >
-          {stats.map((stat, index) => {
+        {stats.map((stat, index) => {
             const Icon = stat.icon
             return (
               <motion.div
@@ -77,11 +79,17 @@ function Overview() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
-                className="card text-center"
+                onClick={() => stat.isClickable && navigate('/location-map')}
+                className={`card text-center ${stat.isClickable ? 'cursor-pointer hover:shadow-lg hover:scale-105 transition-all' : ''}`}
               >
                 <Icon className="w-10 h-10 mx-auto mb-4 text-primary" />
                 <div className="text-sm text-muted-foreground mb-2">{stat.label}</div>
                 <div className="text-2xl font-medium">{stat.value}</div>
+                {stat.isClickable && (
+                  <div className="text-xs text-primary mt-2 font-semibold">
+                    Click to view map →
+                  </div>
+                )}
               </motion.div>
             )
           })}
