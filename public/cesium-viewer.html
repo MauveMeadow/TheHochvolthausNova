@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D City Map - Shadow Simulation</title>
+    <title>3D Site Viewer - Professional</title>
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Widgets/widgets.css" rel="stylesheet">
     <style>
@@ -16,908 +16,538 @@
         html, body {
             width: 100%;
             height: 100%;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            overflow: hidden;
         }
 
         #cesiumContainer {
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: relative;
+            overflow: hidden;
         }
 
-        .header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: linear-gradient(135deg, #001960 0%, #002d9c 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .header-title {
-            color: white;
-            font-size: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
-        }
-
-        .header-nav {
-            display: flex;
-            gap: 12px;
-        }
-
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .control-panel {
-            position: absolute;
-            top: 80px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            z-index: 100;
-            min-width: 240px;
-            max-height: calc(100vh - 150px);
-            overflow-y: auto;
-        }
-
-        .control-panel h3 {
-            margin: 0 0 14px 0;
-            color: #001960;
-            font-size: 16px;
-            font-weight: 600;
-            border-bottom: 2px solid #001960;
-            padding-bottom: 8px;
-        }
-
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .section-label {
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-            margin: 12px 0 8px 0;
-            display: block;
-        }
-
-        .control-btn {
-            background: linear-gradient(135deg, #001960 0%, #002d9c 100%);
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0, 25, 96, 0.25);
-            text-align: left;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 25, 96, 0.35);
-        }
-
-        .control-btn:active {
-            transform: translateY(0);
-        }
-
-        .control-btn.orange {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .control-btn.purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        }
-
-        .dropdown-menu {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            background: white;
-            margin-top: 8px;
-        }
-
-        .dropdown-menu:hover {
-            border-color: #001960;
-        }
-
-        .hidden-counter {
-            text-align: center;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 6px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .info-box {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-            max-width: 320px;
-            max-height: 400px;
-            overflow-y: auto;
-            border-left: 4px solid #16a34a;
-        }
-
-        .info-box h3 {
-            margin: 0 0 12px 0;
-            color: #001960;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .close-btn:hover {
-            background: #b91c1c;
-            transform: rotate(90deg);
-        }
-
-        .property-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .property-item {
-            padding: 8px 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border-left: 3px solid #ddd;
-            word-break: break-word;
-        }
-
-        .property-item.important {
-            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
-            border-left-color: #f59e0b;
-        }
-
-        .property-key {
-            color: #666;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 2px;
-        }
-
-        .property-value {
-            color: #1f2937;
-            font-size: 13px;
-        }
-
-        .time-info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(20, 20, 30, 0.9);
-            color: white;
-            padding: 14px 18px;
-            border-radius: 10px;
-            font-size: 13px;
-            z-index: 90;
-            min-width: 220px;
-            border-left: 4px solid #16a34a;
-            backdrop-filter: blur(10px);
-        }
-
-        .time-display {
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .time-display strong {
-            color: #4ade80;
-        }
-
-        .time-info .time-row {
-            margin: 6px 0;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .time-info .time-row.utc {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: normal;
-        }
-
-        .status-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 16px 28px;
-            border-radius: 10px;
-            font-size: 15px;
-            z-index: 200;
-            animation: fadeInOut 3s ease-in-out forwards;
-        }
-
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            10%, 90% { opacity: 1; }
-        }
-
-        .footer {
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 4px 10px;
-            border-radius: 4px;
-            z-index: 10;
-        }
-
-        .footer a {
-            color: #60a5fa;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Hide Cesium default UI */
-        .cesium-viewer-bottom,
-        .cesium-credit-logoContainer,
-        .cesium-credit-expand-link {
-            display: none !important;
-        }
-
-        /* Scrollbar */
-        .control-panel::-webkit-scrollbar,
-        .info-box::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .control-panel::-webkit-scrollbar-track,
-        .info-box::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-
-        .control-panel::-webkit-scrollbar-thumb,
-        .info-box::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 0 12px;
-                height: 50px;
-            }
-
-            .header-title {
-                font-size: 16px;
-            }
-
-            .header-subtitle {
-                display: none;
-            }
-
-            .nav-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
-            .control-panel {
-                top: 60px;
-                left: 10px;
-                min-width: 180px;
-                padding: 12px;
-            }
-
-            .info-box {
-                top: auto;
-                bottom: 100px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-
-            .time-info {
-                bottom: 10px;
-                left: 10px;
-                min-width: 180px;
-                padding: 10px 14px;
-            }
-        }
     </style>
 </head>
 <body>
     <div id="cesiumContainer"></div>
-    
-    <div class="header">
-        <div class="header-content">
-            <div class="header-title">
-                <span>🌍</span>
-                <span>3D City Map</span>
-            </div>
-            <div class="header-subtitle">Shadow Simulation & Urban Analysis</div>
-        </div>
-        <div class="header-nav">
-            <button class="nav-btn" onclick="openHelp()">❓ Help</button>
-            <button class="nav-btn" onclick="openAbout()">ℹ️ About</button>
-        </div>
-    </div>
-
-    <div class="control-panel" id="controlPanel"></div>
-    <div class="time-info" id="timeInfo"></div>
-    <div class="footer">
-        Powered by <a href="https://cesium.com" target="_blank">Cesium</a> | 3D Geospatial Visualization
-    </div>
 
     <script>
-        // ==================== CESIUM CONFIGURATION ====================
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTQyMjc5My0wNWMxLTQwYjItYTQ2Ny1hN2NmMWQzZTU1ODgiLCJpZCI6Mzc5Njc4LCJpYXQiOjE3Njg1NjY1ODJ9.uNoYxXVWAb2rKHk2u5Etox_rRfq7IUnCFsAK_424OiQ';
+// 1. INJECT PROFESSIONAL TOP-BAR CSS STYLES
+const styles = `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
 
-        const MODEL_ASSET_ID_1 = 4392344;
-        const MODEL_ASSET_ID_2 = 4392629;
-        const OSM_BUILDINGS_ASSET_ID = 96188;
+    body { 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        overflow: hidden; 
+        background: #0f172a; /* Slate 900 */
+        margin: 0;
+        user-select: none;
+    }
+    
+    /* Hide default Cesium UI */
+    .cesium-viewer-toolbar, .cesium-viewer-animationContainer, 
+    .cesium-viewer-timelineContainer, .cesium-viewer-bottom, 
+    .cesium-viewer-fullscreenContainer, .cesium-selection-wrapper { display: none !important; }
+
+    /* ================= TOP BAR CONTAINER ================= */
+    .top-bar {
+        position: absolute; top: 0; left: 0; width: 100%; height: 64px;
+        background: rgba(15, 23, 42, 0.95); /* Deep Slate */
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        z-index: 100; 
+        color: #f8fafc;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 24px;
+        box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Branding Area */
+    .branding {
+        display: flex; align-items: center; gap: 14px;
+        border-right: 1px solid rgba(255,255,255,0.1);
+        padding-right: 24px;
+        margin-right: 24px;
+        height: 40px;
+    }
+    .branding-icon {
+        width: 42px; height: 42px; 
+        color: #ffffff; 
+        display: flex; align-items: center; justify-content: center;
+    }
+    .branding-icon svg { width: 100%; height: 100%; }
+
+    .branding-text h1 { font-size: 18px; font-weight: 700; margin: 0; color: white; letter-spacing: -0.02em; }
+
+    /* ================= TOOLBAR GROUPS ================= */
+    .toolbar-group { display: flex; align-items: center; gap: 16px; height: 100%; }
+    .toolbar-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 8px; }
+    .group-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-right: 4px; }
+
+    /* ================= LAYER TOGGLES ================= */
+    .layer-toggles { display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 8px; }
+    
+    .layer-btn {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 12px;
+        border-radius: 6px; cursor: pointer;
+        background: transparent;
+        border: 1px solid transparent;
+        color: #94a3b8;
+        font-size: 12px; font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .layer-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+    
+    .layer-btn.active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #475569; }
+    .layer-btn.active .status-dot { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.4); }
+
+    .layer-btn.point-cloud.active { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.3); }
+    .layer-btn.point-cloud.active .status-dot { background: #c084fc; box-shadow: 0 0 6px rgba(192, 132, 252, 0.4); }
+
+    /* ================= MEASURE BUTTONS ================= */
+    .tool-btn {
+        display: flex; align-items: center; gap: 6px;
+        padding: 6px 12px; border-radius: 6px; cursor: pointer;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        color: #cbd5e1; font-size: 12px; font-weight: 500; transition: all 0.2s;
+    }
+    .tool-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2); }
+    .tool-btn.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4); }
+
+    /* ================= TIME SLIDER ================= */
+    .time-slider-container { display: flex; align-items: center; gap: 10px; }
+    
+    .time-slider {
+        -webkit-appearance: none;
+        width: 140px;
+        height: 4px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 2px;
+        outline: none;
+    }
+    
+    .time-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3b82f6;
+        cursor: pointer;
+        border: 2px solid #0f172a;
+        box-shadow: 0 0 0 1px #3b82f6;
+        transition: transform 0.1s;
+    }
+    
+    .time-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    
+    .slider-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #3b82f6;
+        font-weight: 600;
+        min-width: 45px;
+    }
+
+    /* ================= ACTION BUTTONS ================= */
+    .icon-btn {
+        width: 36px; height: 36px; border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        color: #cbd5e1; cursor: pointer; transition: all 0.2s; font-size: 14px;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+    .icon-btn.primary { background: #3b82f6; color: white; border: none; width: auto; padding: 0 16px; font-size: 12px; font-weight: 500; }
+    .icon-btn.primary:hover { background: #2563eb; }
+
+    /* ================= INFO BOX ================= */
+    .info-box {
+        position: absolute; top: 80px; right: 24px; width: 300px;
+        background: rgba(15, 23, 42, 0.98); border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.15); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        z-index: 100; color: #f1f5f9; overflow: hidden;
+    }
+    .info-box-header { 
+        padding: 12px 16px; background: rgba(30, 41, 59, 0.5);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1); 
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .info-box-header h3 { font-size: 12px; margin: 0; font-weight: 600; color: white; text-transform: uppercase; letter-spacing: 0.5px;}
+    .info-box-body { padding: 12px 16px; max-height: 400px; overflow-y: auto; }
+    .prop-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+    .prop-key { color: #64748b; font-weight: 500; }
+    .prop-value { color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
+
+    /* ================= BOTTOM STATUS BAR ================= */
+    .bottom-bar {
+        position: absolute; bottom: 0; left: 0; width: 100%; height: 32px;
+        background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        font-size: 11px; color: #64748b; z-index: 90;
+    }
+    .clock-display { font-family: 'JetBrains Mono', monospace; color: #34d399; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+    .status-indicator { width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    /* Toast */
+    .status-toast {
+        position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+        background: #1e293b; padding: 8px 20px; border-radius: 50px;
+        color: white; z-index: 200; pointer-events: none;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 12px; font-weight: 500;
+    }
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
+
+// 2. INJECT HTML TOP-BAR UI
+const uiHTML = `
+    <div class="top-bar">
+        <div class="toolbar-group">
+            <div class="branding">
+                <div class="branding-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="4" width="4" height="16" rx="2" fill="white"/>
+                        <path d="M16 4L22 8V16L16 20L10 16V8L16 4Z" fill="white"/>
+                    </svg>
+                </div>
+                <div class="branding-text">
+                    <h1>Site Viewer</h1>
+                </div>
+            </div>
+
+            <div class="layer-toggles">
+                <button class="layer-btn active" id="btnLayer1" onclick="toggleLayer('1')">
+                    <div class="status-dot"></div> Main Structure
+                </button>
+                <button class="layer-btn point-cloud active" id="btnLayer2" onclick="toggleLayer('2')">
+                    <div class="status-dot"></div> <span style="font-family:serif; font-weight:bold; font-size:14px;">⁖</span> Point Cloud
+                </button>
+                <button class="layer-btn" id="btnLayerOSM" onclick="toggleLayer('OSM')">
+                    <div class="status-dot"></div> Context
+                </button>
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            
+            <div class="toolbar-group">
+                <span class="group-label">Analysis:</span>
+                <button class="tool-btn" id="measureBtn" onclick="toggleMeasureMode()">
+                    <span>📏</span> Distance
+                </button>
+                 <button class="tool-btn" onclick="clearMeasurements()" style="border-style:dashed; opacity:0.7;">
+                    <span>🗑️</span> Clear
+                </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group">
+                <span class="group-label">Shadows:</span>
+                <div class="time-slider-container">
+                    <input type="range" min="6" max="20" step="0.1" value="12" class="time-slider" oninput="handleSliderInput(this.value)">
+                    <span id="sliderTimeLabel" class="slider-value">12:00</span>
+                </div>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <div class="toolbar-group">
+                <button class="icon-btn" id="hideSelectedBtn" title="Hide Selected Object">👁️‍🗨️</button>
+                <button class="icon-btn" id="showAllBtn" title="Restore Visibility">↺</button>
+                <button class="icon-btn primary" id="resetCameraBtn">Recenter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div>System Status: <span style="color:#cbd5e1">Operational</span> <span id="measureStatus" style="color:#f59e0b; margin-left:15px; display:none;">• MEASURE MODE ACTIVE</span></div>
+        <div class="clock-display">
+            <div class="status-indicator"></div>
+            <span id="timeDateDisplay">--</span> | <span id="timeClockDisplay">--:--</span> CET
+        </div>
+    </div>
+`;
+
+const uiContainer = document.createElement("div");
+uiContainer.innerHTML = uiHTML;
+document.body.appendChild(uiContainer);
+
+// 3. JAVASCRIPT LOGIC (CESIUM)
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTQyMjc5My0wNWMxLTQwYjItYTQ2Ny1hN2NmMWQzZTU1ODgiLCJpZCI6Mzc5Njc4LCJpYXQiOjE3Njg1NjY1ODJ9.uNoYxXVWAb2rKHk2u5Etox_rRfq7IUnCFsAK_424OiQ";
+
+const MODEL_ASSET_ID_1 = "4392344";
+const MODEL_ASSET_ID_2 = "4392629"; 
+const OSM_BUILDINGS_ASSET_ID = "96188";
+
+const viewer = new Cesium.Viewer("cesiumContainer", {
+    terrain: Cesium.Terrain.fromWorldTerrain(),
+    shadows: true,
+    shouldAnimate: true,
+    timeline: false,
+    animation: false,
+    baseLayerPicker: false,
+    homeButton: false,
+    navigationHelpButton: false,
+    sceneModePicker: false,
+    geocoder: false,
+    fullscreenButton: false,
+    selectionIndicator: false,
+    infoBox: false
+});
+
+viewer.scene.shadowMap.enabled = true;
+viewer.scene.shadowMap.softShadows = true;
+viewer.scene.globe.enableLighting = true;
+
+// GLOBAL STATE
+let modelPrimitive1, modelPrimitive2, osmBuildingsPrimitive;
+let hiddenElements = new Map();
+let selectedElement = null;
+let measureMode = false;
+let measurePoints = [];
+let measureEntities = [];
+
+// ================= INITIALIZATION =================
+async function loadModels() {
+    try {
+        const t1 = await Cesium.Cesium3DTileset.fromIonAssetId(MODEL_ASSET_ID_1);
+        modelPrimitive1 = viewer.scene.primitives.add(t1);
         
-        let viewer;
-        let modelPrimitive1 = null;
-        let modelPrimitive2 = null;
-        let model1Visible = true;
-        let model2Visible = true;
-        let osmBuildingsPrimitive = null;
-        let osmBuildingsVisible = false;
-        let selectedEntity = null;
-        let currentTime = Cesium.JulianDate.now();
-        let hiddenElements = new Map();
-        let selectedElementForHiding = null;
+        const t2 = await Cesium.Cesium3DTileset.fromIonAssetId(MODEL_ASSET_ID_2);
+        modelPrimitive2 = viewer.scene.primitives.add(t2);
+        
+        await viewer.zoomTo(modelPrimitive1, new Cesium.HeadingPitchRange(0, -0.5, 500));
+        showToast("System Ready - Models Loaded");
+    } catch(e) { console.log(e); }
+}
 
-        // ==================== INITIALIZATION ====================
-        async function initializeViewer() {
-            try {
-                showStatusMessage('Initializing 3D viewer...');
+// ================= LAYERS =================
+window.toggleLayer = async (layerId) => {
+    const btn = document.getElementById('btnLayer' + layerId);
+    const isActive = btn.classList.contains('active');
+    
+    if(isActive) btn.classList.remove('active');
+    else btn.classList.add('active');
 
-                viewer = new Cesium.Viewer('cesiumContainer', {
-                    terrain: Cesium.Terrain.fromWorldTerrain({
-                        requestWaterMask: true,
-                        requestVertexNormals: true
-                    }),
-                    shadows: true,
-                    shouldAnimate: true,
-                    animation: false,
-                    timeline: false,
-                    baseLayerPicker: false,
-                    geocoder: false,
-                    homeButton: false,
-                    sceneModePicker: false,
-                    navigationHelpButton: false,
-                    fullscreenButton: false,
-                    infoBox: false,
-                    selectionIndicator: false
-                });
-
-                viewer.scene.shadowMap.enabled = true;
-                viewer.scene.shadowMap.softShadows = true;
-                viewer.scene.shadowMap.darkness = 0.5;
-                viewer.scene.globe.enableLighting = true;
-                viewer.scene.lightSource = new Cesium.DirectionalLight({
-                    direction: new Cesium.Cartesian3(0.1, 0.2, 1)
-                });
-
-                await loadModels();
-                setupControlPanel();
-                setupPickHandler();
-                updateTimeDisplay();
-
-                console.log('Initialization complete');
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showStatusMessage('Error: ' + error.message);
+    if(layerId === '1' && modelPrimitive1) modelPrimitive1.show = !isActive;
+    if(layerId === '2' && modelPrimitive2) modelPrimitive2.show = !isActive;
+    
+    if(layerId === 'OSM') {
+        if(!isActive) { 
+            if(!osmBuildingsPrimitive) {
+                showToast("Loading City Context...");
+                osmBuildingsPrimitive = viewer.scene.primitives.add(await Cesium.Cesium3DTileset.fromIonAssetId(OSM_BUILDINGS_ASSET_ID));
             }
+            osmBuildingsPrimitive.show = true;
+        } else {
+            if(osmBuildingsPrimitive) osmBuildingsPrimitive.show = false;
         }
+    }
+};
 
-        // ==================== MODEL LOADING ====================
-        async function loadModels() {
-            try {
-                showStatusMessage('Loading 3D models...');
+// ================= SHADOW SLIDER LOGIC =================
+window.handleSliderInput = (val) => {
+    // 1. Calculate Time from slider value (float hours)
+    const hours = Math.floor(val);
+    const minutes = Math.floor((val - hours) * 60);
+    
+    const date = new Date();
+    date.setHours(hours, minutes, 0);
+    
+    // 2. Update UI Label
+    const timeStr = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+    document.getElementById('sliderTimeLabel').innerText = timeStr;
 
-                const [tileset1, tileset2] = await Promise.all([
-                    Cesium.Cesium3DTileset.fromIonAssetId(MODEL_ASSET_ID_1, { maximumScreenSpaceError: 16 }),
-                    Cesium.Cesium3DTileset.fromIonAssetId(MODEL_ASSET_ID_2, { maximumScreenSpaceError: 16 })
-                ]);
+    // 3. Update Cesium Sun Position
+    // Rough simulation: UTC = Local Time - 1 Hour
+    const utcDate = new Date(date.getTime() - (60 * 60 * 1000)); 
+    viewer.clock.currentTime = Cesium.JulianDate.fromDate(utcDate);
+    updateTimeDisplay();
+}
 
-                modelPrimitive1 = viewer.scene.primitives.add(tileset1);
-                modelPrimitive2 = viewer.scene.primitives.add(tileset2);
+// ================= MEASUREMENT TOOLS =================
+window.toggleMeasureMode = () => {
+    measureMode = !measureMode;
+    const btn = document.getElementById('measureBtn');
+    const status = document.getElementById('measureStatus');
+    
+    if(measureMode) {
+        btn.classList.add('active');
+        status.style.display = "inline";
+        viewer.canvas.style.cursor = "crosshair";
+        showToast("Measure Mode: Click 2 points");
+        closeInfoBox();
+    } else {
+        btn.classList.remove('active');
+        status.style.display = "none";
+        viewer.canvas.style.cursor = "default";
+        measurePoints = [];
+    }
+};
 
-                await new Promise(resolve => setTimeout(resolve, 500));
-                await viewer.zoomTo(modelPrimitive1, new Cesium.HeadingPitchRange(0, -Math.PI / 6, 0));
+window.clearMeasurements = () => {
+    measureEntities.forEach(e => viewer.entities.remove(e));
+    measureEntities = [];
+    measurePoints = [];
+    showToast("Measurements Cleared");
+};
 
-                showStatusMessage('Models loaded successfully!');
-            } catch (error) {
-                console.error('Model loading error:', error);
-                showStatusMessage('Models loaded (some features limited)');
-            }
-        }
+// ================= INTERACTION HANDLER =================
+const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
-        // ==================== PICK HANDLER ====================
-        function setupPickHandler() {
-            viewer.canvas.addEventListener('click', function(e) {
-                const pickedObject = viewer.scene.pick(new Cesium.Cartesian2(e.clientX, e.clientY));
-
-                if (Cesium.defined(pickedObject) && pickedObject.id) {
-                    displayElementInfo(pickedObject.id);
-                } else {
-                    if (selectedEntity) {
-                        selectedEntity.color = undefined;
-                        selectedEntity = null;
-                    }
-                    closeInfoBox();
-                }
+handler.setInputAction((click) => {
+    // 1. MEASUREMENT LOGIC
+    if (measureMode) {
+        const pickedPosition = viewer.scene.pickPosition(click.position);
+        if (pickedPosition) {
+            measurePoints.push(pickedPosition);
+            
+            // Draw Point
+            const pointEntity = viewer.entities.add({
+                position: pickedPosition,
+                point: { pixelSize: 8, color: Cesium.Color.YELLOW, disableDepthTestDistance: Number.POSITIVE_INFINITY }
             });
-        }
+            measureEntities.push(pointEntity);
 
-        // ==================== ELEMENT INFO ====================
-        function displayElementInfo(entity) {
-            selectedEntity = entity;
-            selectedElementForHiding = entity;
-
-            if (entity.color !== undefined) {
-                entity.color = Cesium.Color.YELLOW.withAlpha(0.7);
-            }
-
-            const properties = getEntityProperties(entity);
-            renderInfoBox(properties);
-        }
-
-        function getEntityProperties(entity) {
-            const props = {};
-
-            if (entity.properties) {
-                for (let key in entity.properties) {
-                    if (entity.properties.hasOwnProperty(key)) {
-                        const value = entity.properties[key];
-                        props[key] = Cesium.defined(value) ? value.getValue(Cesium.JulianDate.now()) : 'N/A';
-                    }
-                }
-            }
-
-            ['id', 'name', 'description', 'categoryName', 'Family', 'Type', 'Level'].forEach(prop => {
-                if (entity[prop] !== undefined && !props[prop]) {
-                    props[prop] = entity[prop];
-                }
-            });
-
-            return props;
-        }
-
-        function renderInfoBox(properties) {
-            closeInfoBox();
-
-            const infoBox = document.createElement('div');
-            infoBox.className = 'info-box';
-            infoBox.id = 'infoBox';
-
-            const importantProps = ['categoryName', 'Family', 'Type', 'Level', 'name', 'id'];
-
-            let html = '<h3>Element Properties <button class="close-btn" id="closeBtn">✕</button></h3>';
-            html += '<div class="property-list">';
-
-            for (let key in properties) {
-                if (properties.hasOwnProperty(key)) {
-                    const isImportant = importantProps.includes(key);
-                    html += `
-                        <div class="property-item ${isImportant ? 'important' : ''}">
-                            <div class="property-key">${escapeHtml(key)}</div>
-                            <div class="property-value">${escapeHtml(String(properties[key]))}</div>
-                        </div>
-                    `;
-                }
-            }
-
-            html += '</div>';
-            infoBox.innerHTML = html;
-            document.body.appendChild(infoBox);
-
-            document.getElementById('closeBtn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                closeInfoBox();
-                if (selectedEntity && selectedEntity.color !== undefined) {
-                    selectedEntity.color = undefined;
-                    selectedEntity = null;
-                }
-            });
-        }
-
-        function closeInfoBox() {
-            const infoBox = document.getElementById('infoBox');
-            if (infoBox) infoBox.remove();
-        }
-
-        // ==================== CONTROL PANEL ====================
-        function setupControlPanel() {
-            const panel = document.getElementById('controlPanel');
-
-            let html = '<h3>☀️ Shadow Simulation</h3>';
-            html += '<div class="button-group">';
-            html += '<button class="control-btn" id="setDateTimeBtn">📅 Set Date/Time</button>';
-            html += '<button class="control-btn" id="resetCameraBtn">🎥 Reset Camera</button>';
-            html += '</div>';
-
-            html += '<label class="section-label">Asset Visibility:</label>';
-            html += '<div class="button-group">';
-            html += '<button class="control-btn" id="model1Btn">👁️ Asset 1: ON</button>';
-            html += '<button class="control-btn" id="model2Btn">👁️ Asset 2: ON</button>';
-            html += '<button class="control-btn" id="osmBuildingsBtn">🏢 OSM Buildings: OFF</button>';
-            html += '</div>';
-
-            html += '<label class="section-label">Element Visibility:</label>';
-            html += '<div class="button-group">';
-            html += '<button class="control-btn orange" id="hideSelectedBtn">👁️ Hide Selected</button>';
-            html += '<button class="control-btn purple" id="showAllBtn">👁️ Show All Hidden</button>';
-            html += '<div class="hidden-counter">Hidden elements: <span id="hiddenCount">0</span></div>';
-            html += '</div>';
-
-            html += '<label class="section-label">Quick Time Selection:</label>';
-            html += '<select class="dropdown-menu" id="quickTimeSelect">';
-            html += '<option value="">-- Select Time --</option>';
-            html += '<option value="current">Current Time</option>';
-            html += '<option value="08:00">Morning (08:00 CET)</option>';
-            html += '<option value="12:00">Noon (12:00 CET)</option>';
-            html += '<option value="15:00">Afternoon (15:00 CET)</option>';
-            html += '<option value="18:00">Evening (18:00 CET)</option>';
-            html += '</select>';
-
-            panel.innerHTML = html;
-
-            setTimeout(() => {
-                document.getElementById('setDateTimeBtn')?.addEventListener('click', setDateTimePrompt);
-                document.getElementById('resetCameraBtn')?.addEventListener('click', resetCamera);
-                document.getElementById('model1Btn')?.addEventListener('click', toggleModel1);
-                document.getElementById('model2Btn')?.addEventListener('click', toggleModel2);
-                document.getElementById('osmBuildingsBtn')?.addEventListener('click', toggleOSMBuildings);
-                document.getElementById('hideSelectedBtn')?.addEventListener('click', hideSelectedElement);
-                document.getElementById('showAllBtn')?.addEventListener('click', showAllHiddenElements);
-                document.getElementById('quickTimeSelect')?.addEventListener('change', function(e) {
-                    if (e.target.value) {
-                        handleQuickTimeSelect(e.target.value);
-                        e.target.value = '';
+            // If we have 2 points, draw line and label
+            if (measurePoints.length === 2) {
+                const start = measurePoints[0];
+                const end = measurePoints[1];
+                const distance = Cesium.Cartesian3.distance(start, end);
+                
+                // Draw Line
+                const lineEntity = viewer.entities.add({
+                    polyline: {
+                        positions: [start, end],
+                        width: 3,
+                        material: new Cesium.PolylineDashMaterialProperty({ color: Cesium.Color.YELLOW }),
+                        depthFailMaterial: new Cesium.PolylineDashMaterialProperty({ color: Cesium.Color.YELLOW })
                     }
                 });
-            }, 100);
-        }
+                measureEntities.push(lineEntity);
 
-        // ==================== DATE/TIME CONTROL ====================
-        function setDateTimePrompt() {
-            const dateInput = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-            if (!dateInput) return;
-
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
-                showStatusMessage('Invalid date format. Use YYYY-MM-DD');
-                return;
-            }
-
-            const timeInput = prompt('Enter time in CET (HH:MM):', '12:00');
-            if (!timeInput) return;
-
-            if (!/^\d{2}:\d{2}$/.test(timeInput)) {
-                showStatusMessage('Invalid time format. Use HH:MM');
-                return;
-            }
-
-            setDateTimeFromInput(dateInput, timeInput);
-        }
-
-        function setDateTimeFromInput(dateString, timeString) {
-            try {
-                const [year, month, day] = dateString.split('-').map(Number);
-                const [hours, minutes] = timeString.split(':').map(Number);
-                const date = new Date(year, month - 1, day, hours, minutes, 0);
-                const cetOffset = getCETOffset(date);
-                const utcDate = new Date(date.getTime() - cetOffset * 60000);
-
-                currentTime = Cesium.JulianDate.fromDate(utcDate);
-                viewer.clock.currentTime = currentTime;
-
-                updateShadowDirection();
-                updateTimeDisplay();
-                showStatusMessage(`Time set to: ${dateString} ${timeString} CET`);
-            } catch (error) {
-                showStatusMessage('Error parsing date/time');
-            }
-        }
-
-        function handleQuickTimeSelect(value) {
-            if (value === 'current') {
-                currentTime = Cesium.JulianDate.now();
-            } else {
-                const cesiumDate = Cesium.JulianDate.toDate(currentTime);
-                const [hours, minutes] = value.split(':').map(Number);
-                const date = new Date(cesiumDate.getFullYear(), cesiumDate.getMonth(), cesiumDate.getDate(), hours, minutes, 0);
-                const cetOffset = getCETOffset(date);
-                const utcDate = new Date(date.getTime() - cetOffset * 60000);
-                currentTime = Cesium.JulianDate.fromDate(utcDate);
-            }
-
-            viewer.clock.currentTime = currentTime;
-            updateShadowDirection();
-            updateTimeDisplay();
-        }
-
-        // ==================== SHADOW CALCULATION ====================
-        function updateShadowDirection() {
-            const date = Cesium.JulianDate.toDate(currentTime);
-            const sunPosition = calculateSunPosition(date);
-            if (viewer.scene.lightSource) {
-                viewer.scene.lightSource.direction = sunPosition;
-            }
-        }
-
-        function calculateSunPosition(date) {
-            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
-            const hourOfDay = date.getHours() + date.getMinutes() / 60;
-            const declination = 23.44 * Math.sin((dayOfYear - 81) * Math.PI / 182.6) * Math.PI / 180;
-            const hourAngle = (hourOfDay - 12) * 15 * Math.PI / 180;
-            const x = Math.cos(declination) * Math.sin(hourAngle);
-            const y = Math.sin(declination);
-            const z = Math.cos(declination) * Math.cos(hourAngle);
-            return new Cesium.Cartesian3(x, y, z);
-        }
-
-        // ==================== TIME CONVERSION ====================
-        function getCETOffset(date) {
-            const year = date.getFullYear();
-            const lastSundayMarch = getLastSunday(year, 2);
-            const lastSundayOctober = getLastSunday(year, 9);
-            return (date >= lastSundayMarch && date < lastSundayOctober) ? -120 : -60;
-        }
-
-        function getLastSunday(year, month) {
-            const date = new Date(year, month + 1, 0);
-            while (date.getDay() !== 0) date.setDate(date.getDate() - 1);
-            return date;
-        }
-
-        // ==================== DISPLAY UPDATES ====================
-        function updateTimeDisplay() {
-            const dateUtc = Cesium.JulianDate.toDate(currentTime);
-            const cetOffset = getCETOffset(dateUtc);
-            const cetDate = new Date(dateUtc.getTime() + cetOffset * 60000);
-
-            const timeInfo = document.getElementById('timeInfo');
-            if (!timeInfo) return;
-
-            const dateStr = cetDate.toLocaleDateString('en-CA');
-            const timeCET = cetDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-            const timeUTC = dateUtc.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-
-            timeInfo.innerHTML = `
-                <div class="time-display"><strong>Current Time:</strong></div>
-                <div class="time-row">${dateStr}</div>
-                <div class="time-row" style="color: #4ade80;">${timeCET} CET</div>
-                <div class="time-row utc">${timeUTC} UTC</div>
-            `;
-        }
-
-        function resetCamera() {
-            if (modelPrimitive1) {
-                viewer.zoomTo(modelPrimitive1, new Cesium.HeadingPitchRange(0, -Math.PI / 6, 0));
-                showStatusMessage('Camera reset');
-            }
-        }
-
-        // ==================== ASSET TOGGLES ====================
-        function toggleModel1() {
-            if (!modelPrimitive1) {
-                showStatusMessage('Asset 1 not loaded');
-                return;
-            }
-            model1Visible = !model1Visible;
-            modelPrimitive1.show = model1Visible;
-            document.getElementById('model1Btn').textContent = `👁️ Asset 1: ${model1Visible ? 'ON' : 'OFF'}`;
-            showStatusMessage(`Asset 1 ${model1Visible ? 'enabled' : 'disabled'}`);
-        }
-
-        function toggleModel2() {
-            if (!modelPrimitive2) {
-                showStatusMessage('Asset 2 not loaded');
-                return;
-            }
-            model2Visible = !model2Visible;
-            modelPrimitive2.show = model2Visible;
-            document.getElementById('model2Btn').textContent = `👁️ Asset 2: ${model2Visible ? 'ON' : 'OFF'}`;
-            showStatusMessage(`Asset 2 ${model2Visible ? 'enabled' : 'disabled'}`);
-        }
-
-        async function toggleOSMBuildings() {
-            try {
-                if (osmBuildingsVisible) {
-                    if (osmBuildingsPrimitive) {
-                        viewer.scene.primitives.remove(osmBuildingsPrimitive);
-                        osmBuildingsPrimitive = null;
+                // Draw Label at midpoint
+                const midpoint = Cesium.Cartesian3.lerp(start, end, 0.5, new Cesium.Cartesian3());
+                const labelEntity = viewer.entities.add({
+                    position: midpoint,
+                    label: {
+                        text: `${distance.toFixed(2)}m`,
+                        font: '14px JetBrains Mono',
+                        fillColor: Cesium.Color.BLACK,
+                        showBackground: true,
+                        backgroundColor: Cesium.Color.YELLOW,
+                        backgroundPadding: new Cesium.Cartesian2(8, 4),
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                        pixelOffset: new Cesium.Cartesian2(0, -20)
                     }
-                    osmBuildingsVisible = false;
-                    document.getElementById('osmBuildingsBtn').textContent = '🏢 OSM Buildings: OFF';
-                    showStatusMessage('OSM Buildings disabled');
-                } else {
-                    const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(OSM_BUILDINGS_ASSET_ID, {
-                        maximumScreenSpaceError: 8
-                    });
-                    osmBuildingsPrimitive = viewer.scene.primitives.add(tileset);
-                    osmBuildingsVisible = true;
-                    document.getElementById('osmBuildingsBtn').textContent = '🏢 OSM Buildings: ON';
-                    showStatusMessage('OSM Buildings enabled');
-                }
-            } catch (error) {
-                showStatusMessage('Error loading OSM Buildings');
-            }
-        }
-
-        // ==================== ELEMENT VISIBILITY ====================
-        function hideSelectedElement() {
-            if (!selectedElementForHiding) {
-                showStatusMessage('No element selected');
-                return;
-            }
-
-            if (!hiddenElements.has(selectedElementForHiding)) {
-                hiddenElements.set(selectedElementForHiding, {
-                    originalColor: selectedElementForHiding.color,
-                    originalShow: selectedElementForHiding.show
                 });
+                measureEntities.push(labelEntity);
+
+                // Reset for next pair
+                measurePoints = []; 
+                showToast(`Distance: ${distance.toFixed(2)}m`);
             }
-
-            selectedElementForHiding.show = false;
-            updateHiddenCounter();
-            showStatusMessage(`Element hidden (${hiddenElements.size} hidden)`);
-            selectedElementForHiding = null;
-            closeInfoBox();
         }
+        return; // Stop processing picks if measuring
+    }
 
-        function showAllHiddenElements() {
-            if (hiddenElements.size === 0) {
-                showStatusMessage('No hidden elements');
-                return;
-            }
-
-            hiddenElements.forEach((state, element) => {
-                element.show = true;
-                element.color = state.originalColor;
-            });
-
-            hiddenElements.clear();
-            updateHiddenCounter();
-            showStatusMessage('All elements visible!');
+    // 2. STANDARD SELECTION LOGIC
+    const picked = viewer.scene.pick(click.position);
+    if (Cesium.defined(picked)) {
+        selectedElement = picked;
+        if (picked instanceof Cesium.Cesium3DTileFeature) {
+             picked.color = Cesium.Color.fromCssColorString('#3b82f6');
+             showInfoBox(picked);
         }
+    } else {
+        selectedElement = null;
+        closeInfoBox();
+    }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-        function updateHiddenCounter() {
-            const counter = document.getElementById('hiddenCount');
-            if (counter) counter.textContent = hiddenElements.size;
+
+// ================= ACTIONS =================
+document.getElementById("hideSelectedBtn").onclick = () => {
+    if (selectedElement) {
+        hiddenElements.set(selectedElement, selectedElement.show);
+        selectedElement.show = false;
+        selectedElement.color = Cesium.Color.TRANSPARENT; 
+        selectedElement = null;
+        closeInfoBox();
+        showToast("Object Hidden");
+    } else {
+        showToast("Select an object to hide");
+    }
+};
+
+document.getElementById("showAllBtn").onclick = () => {
+    hiddenElements.forEach((val, el) => {
+        el.color = Cesium.Color.WHITE; 
+        el.show = true;
+    });
+    hiddenElements.clear();
+    showToast("Visibility Restored");
+};
+
+document.getElementById("resetCameraBtn").onclick = () => {
+    if(modelPrimitive1) viewer.zoomTo(modelPrimitive1, new Cesium.HeadingPitchRange(0, -0.5, 500));
+};
+
+// ================= UI HELPERS =================
+function updateTimeDisplay() {
+    const d = Cesium.JulianDate.toDate(viewer.clock.currentTime);
+    const local = new Date(d.getTime() + (60*60*1000));
+    document.getElementById("timeClockDisplay").innerText = local.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById("timeDateDisplay").innerText = local.toLocaleDateString();
+}
+
+function showInfoBox(feature) {
+    closeInfoBox();
+    const props = feature.getPropertyNames();
+    let content = `<div class="info-box" id="activeInfoBox">
+        <div class="info-box-header"><h3>Properties</h3><button style="background:none; border:none; color:white; cursor:pointer;" onclick="closeInfoBox()">✕</button></div>
+        <div class="info-box-body">`;
+    
+    const whitelist = ['name', 'id', 'Height', 'Level', 'Category', 'Family', 'Type'];
+    let count = 0;
+    props.forEach(p => { 
+        if(count < 8 && (whitelist.includes(p) || p.length < 15)) {
+             content += `<div class="prop-row"><span class="prop-key">${p}</span><span class="prop-value">${feature.getProperty(p)}</span></div>`;
+             count++;
         }
+    });
+    content += `</div></div>`;
+    
+    const div = document.createElement("div");
+    div.innerHTML = content;
+    document.body.appendChild(div);
+}
 
-        // ==================== UTILITY ====================
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+window.closeInfoBox = () => {
+    const el = document.getElementById("activeInfoBox");
+    if(el) el.remove();
+};
 
-        function showStatusMessage(message) {
-            const statusDiv = document.createElement('div');
-            statusDiv.className = 'status-message';
-            statusDiv.textContent = message;
-            document.body.appendChild(statusDiv);
-            setTimeout(() => statusDiv.remove(), 3000);
-        }
+function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "status-toast";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
 
-        function openHelp() {
-            alert(`📖 Quick Start Guide
-
-1. DATE/TIME CONTROL:
-   • Click "Set Date/Time" for custom date/time (CET)
-   • Use Quick Selection for preset times
-   • Shadows update automatically
-
-2. ASSET VISIBILITY:
-   • Toggle Asset 1 & 2 independently
-   • Enable/disable OSM buildings for context
-
-3. ELEMENT SELECTION:
-   • Click any 3D element to select
-   • Properties appear on the right
-   • Click "Hide Selected" to hide elements
-
-4. NAVIGATION:
-   • Left-click drag to rotate
-   • Right-click drag to pan
-   • Scroll to zoom`);
-        }
-
-        function openAbout() {
-            alert(`🌍 3D City Map - Shadow Simulation
-
-Features:
-• Dual asset visualization
-• CET/CEST time control
-• Real-time shadow simulation
-• OSM buildings context layer
-• Element visibility control
-• Interactive property inspection
-
-Built with Cesium.js`);
-        }
-
-        // ==================== AUTO-UPDATE & START ====================
-        setInterval(updateTimeDisplay, 1000);
-        initializeViewer();
+// Start
+loadModels();
+setInterval(updateTimeDisplay, 1000);
     </script>
+</body>
+</html>
 </body>
 </html>
