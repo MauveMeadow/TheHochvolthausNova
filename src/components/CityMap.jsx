@@ -85,7 +85,7 @@ function CityMap() {
     <div className="city-map-wrapper" style={{ position: 'relative' }}>
       <iframe
         ref={iframeRef}
-        src="./cesium-shadow-viewer.html"
+        src="./cesium-viewer.html"
         title="3D City Map - Shadow Simulation"
         className="cesium-iframe"
         allowFullScreen
@@ -104,7 +104,7 @@ function CityMap() {
                 setLoadError(null)
                 setIsLoading(true)
                 if (iframeRef.current) {
-                  iframeRef.current.src = './cesium-shadow-viewer.html'
+                  iframeRef.current.src = './cesium-viewer.html'
                 }
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#f59e0b'}
