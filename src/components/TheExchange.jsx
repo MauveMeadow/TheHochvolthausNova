@@ -166,7 +166,7 @@ function TheExchange() {
                           ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
                           : 'var(--secondary)',
                         color: isActive ? '#ffffff' : 'var(--muted-foreground)',
-                        border: 'none',
+                        border: 'none !important',
                         outline: 'none',
                         borderRadius: '1rem',
                         padding: '0.875rem 1.25rem',
@@ -259,7 +259,7 @@ function TheExchange() {
                           ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
                           : 'var(--secondary)',
                         color: isActive ? '#ffffff' : 'var(--muted-foreground)',
-                        border: 'none',
+                        border: 'none !important',
                         outline: 'none',
                         borderRadius: '1rem',
                         padding: '0.875rem 1.25rem',

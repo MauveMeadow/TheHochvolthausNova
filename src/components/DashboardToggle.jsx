@@ -81,10 +81,12 @@ const DashboardToggle = ({ onSelectItem }) => {
                     ? 'linear-gradient(135deg, var(--primary) 0%, #1a3a8a 100%)'
                     : 'var(--secondary)',
                   color: isSelected ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+                  border: 'none',
                   borderRadius: '1rem',
                   padding: '1.25rem 2rem',
                   fontSize: '1.125rem',
                   fontWeight: 600,
+                  outline: 'none',
                   boxShadow: isSelected 
                     ? '0 4px 20px rgba(0, 25, 96, 0.25)' 
                     : '0 2px 8px rgba(0, 0, 0, 0.06)',

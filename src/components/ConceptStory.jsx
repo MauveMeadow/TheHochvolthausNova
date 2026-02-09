@@ -328,10 +328,12 @@ const ConceptStory = () => {
                     ? 'linear-gradient(135deg, var(--primary) 0%, #1a3a8a 100%)'
                     : 'var(--secondary)',
                   color: isActive ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+                  border: 'none',
                   borderRadius: '1rem',
                   padding: '1rem 1.5rem',
                   fontSize: '1rem',
                   fontWeight: 600,
+                  outline: 'none',
                   boxShadow: isActive 
                     ? '0 4px 20px rgba(0, 25, 96, 0.25)' 
                     : '0 2px 8px rgba(0, 0, 0, 0.06)',
