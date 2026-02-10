@@ -89,7 +89,7 @@ function CityMap() {
         title="3D City Map - Shadow Simulation"
         className="cesium-iframe"
         allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; webgl; xr-spatial-tracking"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking"
         style={{ display: loadError ? 'none' : 'block' }}
       />
       
