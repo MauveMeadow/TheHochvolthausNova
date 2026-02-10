@@ -49,6 +49,12 @@ function Contact() {
       href: 'mailto:contact@hochvolthaus.de'
     },
     {
+      icon: Mail,
+      title: 'Email',
+      content: 'fusionlab500@gmail.com',
+      href: 'mailto:fusionlab500@gmail.com'
+    },
+    {
       icon: Phone,
       title: 'Phone',
       content: '+49 (0) 0000000',
