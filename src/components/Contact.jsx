@@ -45,12 +45,6 @@ function Contact() {
     {
       icon: Mail,
       title: 'Email',
-      content: 'contact@hochvolthaus.de',
-      href: 'mailto:contact@hochvolthaus.de'
-    },
-    {
-      icon: Mail,
-      title: 'Email',
       content: 'fusionlab500@gmail.com',
       href: 'mailto:fusionlab500@gmail.com'
     },
