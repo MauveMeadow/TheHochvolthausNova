@@ -19,6 +19,7 @@ import FormaAnalysisIntegration from './components/FormaAnalysisIntegration'
 import LocationMap from './components/LocationMap'
 import BuildingTimeline from './components/BuildingTimeline'
 import GetInvolved from './components/GetInvolved'
+import Footer from './components/Footer'
 
 function App() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -124,10 +125,12 @@ function App() {
                 </main>
 
                 <ChatSupport />
+                <Footer />
               </>
             )
           } />
         </Routes>
+        <Footer />
       </div>
     </BrowserRouter>
   )
