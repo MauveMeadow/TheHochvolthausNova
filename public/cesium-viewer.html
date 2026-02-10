@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Site Viewer - Professional</title>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Cesium.js" crossorigin="anonymous"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Widgets/widgets.css" rel="stylesheet" crossorigin="anonymous">
     <style>
         * {
             margin: 0;
@@ -31,6 +31,13 @@
     <div id="cesiumContainer"></div>
 
     <script>
+// Check if Cesium loaded from CDN
+if (typeof Cesium === 'undefined') {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0f172a;color:#ff6b6b;font-family:sans-serif;flex-direction:column;gap:16px;"><h2>Failed to load Cesium.js</h2><p style="color:#94a3b8;">The 3D engine could not be loaded. Check your internet connection.</p><button onclick="location.reload()" style="padding:10px 24px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;">Retry</button></div>';
+    throw new Error('Cesium.js CDN failed to load');
+}
+
+try {
 // 1. INJECT PROFESSIONAL TOP-BAR CSS STYLES
 const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
@@ -546,8 +553,11 @@ function showToast(msg) {
 // Start
 loadModels();
 setInterval(updateTimeDisplay, 1000);
+
+} catch(err) {
+    console.error('Cesium Viewer initialization failed:', err);
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0f172a;color:#ff6b6b;font-family:sans-serif;flex-direction:column;gap:16px;"><h2>Viewer Error</h2><p style="color:#94a3b8;max-width:400px;text-align:center;">' + err.message + '</p><button onclick="location.reload()" style="padding:10px 24px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;">Retry</button></div>';
+}
     </script>
-</body>
-</html>
 </body>
 </html>
