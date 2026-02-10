@@ -90,7 +90,6 @@ function CityMap() {
         className="cesium-iframe"
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; webgl; xr-spatial-tracking"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         style={{ display: loadError ? 'none' : 'block' }}
       />
       
