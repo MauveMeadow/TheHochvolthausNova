@@ -85,11 +85,11 @@ function CityMap() {
     <div className="city-map-wrapper" style={{ position: 'relative' }}>
       <iframe
         ref={iframeRef}
-        src={`${import.meta.env.BASE_URL}cesium-viewer.html`}
+        src="./cesium-viewer.html"
         title="3D City Map - Shadow Simulation"
         className="cesium-iframe"
         allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; webgl; xr-spatial-tracking"
         style={{ display: loadError ? 'none' : 'block' }}
       />
       
@@ -105,7 +105,7 @@ function CityMap() {
                 setLoadError(null)
                 setIsLoading(true)
                 if (iframeRef.current) {
-                  iframeRef.current.src = `${import.meta.env.BASE_URL}cesium-viewer.html`
+                  iframeRef.current.src = './cesium-viewer.html'
                 }
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#f59e0b'}
