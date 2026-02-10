@@ -57,8 +57,8 @@ function Contact() {
     {
       icon: MapPin,
       title: 'Location',
-      content: 'TUM Campus, Munich',
-      href: '#'
+      content: 'Theresienstr. 90, 80333 München',
+      href: 'https://www.google.com/maps/search/Theresienstr.+90,+80333+M%C3%BCnchen'
     }
   ]
 
@@ -101,7 +101,10 @@ function Contact() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + index * 0.1 }}
-                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors !text-black hover:!text-black"
+                  style={{ textDecoration: 'none' }}
+                  target={info.href.startsWith('https') ? '_blank' : undefined}
+                  rel={info.href.startsWith('https') ? 'noopener noreferrer' : undefined}
                 >
                   <div className="flex-shrink-0">
                     <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-foreground text-background">
@@ -109,7 +112,7 @@ function Contact() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">{info.title}</h3>
+                    <h3 className="text-lg font-semibold !text-black">{info.title}</h3>
                     <p className="text-gray-600">{info.content}</p>
                   </div>
                 </motion.a>
