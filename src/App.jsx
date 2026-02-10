@@ -125,7 +125,6 @@ function App() {
                 </main>
 
                 <ChatSupport />
-                <Footer />
               </>
             )
           } />
