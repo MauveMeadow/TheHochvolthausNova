@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import BuildingTitle from './BuildingTitle'
 
 const tabs = [
@@ -14,30 +14,36 @@ const tabs = [
 
 function Navigation({ activeTab, onTabChange }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const location = useLocation()
+  const isContactPage = location.pathname === '/contact'
+  const isSignInPage = location.pathname === '/signin'
+  const isSignUpPage = location.pathname === '/signup'
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/5">
-      <div className="container">
-        <div className="flex items-center justify-between h-14">
-          {/* Logo */}
-          <BuildingTitle onClick={() => onTabChange('overview')} />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-black/5 pt-3">
+      {/* Logo - Absolute top left */}
+      <div style={{ position: 'absolute', top: '12px', left: '24px', zIndex: 51 }}>
+        <BuildingTitle onClick={() => onTabChange('overview')} />
+      </div>
 
-          {/* Desktop Tabs */}
+      <div className="container">
+        <div className="flex items-center justify-center h-14">
+          {/* Desktop Tabs - Centered */}
           <div className="hidden md:block">
             <div className="tabs">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                  className={`tab ${activeTab === tab.id && !isContactPage && !isSignInPage && !isSignUpPage ? 'active' : ''}`}
                 >
                   {tab.label}
                 </button>
               ))}
-              <Link to="/contact" className="tab contact-link">
-                Contact
+              <Link to="/contact" className={`tab contact-link ${isContactPage ? 'active' : ''}`}>
+                Contact Us
               </Link>
-              <Link to="/signin" className="btn btn-primary signin-btn">
+              <Link to="/signin" className={`tab signin-link ${isSignInPage ? 'active' : ''}`}>
                 Sign In
               </Link>
             </div>
@@ -45,7 +51,7 @@ function Navigation({ activeTab, onTabChange }) {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 ml-auto"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -68,7 +74,7 @@ function Navigation({ activeTab, onTabChange }) {
                   setIsMobileMenuOpen(false)
                 }}
                 className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === tab.id
+                  activeTab === tab.id && !isContactPage && !isSignInPage && !isSignUpPage
                     ? 'bg-foreground text-background'
                     : 'hover:bg-secondary'
                 }`}
@@ -78,14 +84,22 @@ function Navigation({ activeTab, onTabChange }) {
             ))}
             <Link 
               to="/contact" 
-              className="block w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-secondary"
+              className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                isContactPage
+                  ? 'bg-foreground text-background'
+                  : 'hover:bg-secondary'
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Contact
+              Contact Us
             </Link>
             <Link 
               to="/signin" 
-              className="block w-full text-center mt-4 btn btn-primary"
+              className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                isSignInPage
+                  ? 'bg-foreground text-background'
+                  : 'hover:bg-secondary'
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Sign In

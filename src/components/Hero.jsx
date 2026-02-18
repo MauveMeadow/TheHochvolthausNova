@@ -43,13 +43,6 @@ function Hero({ onExplore }) {
         animate="visible"
         className="relative z-10 max-w-4xl mx-auto px-6 text-center"
       >
-        {/* Badge */}
-        <motion.div
-          variants={itemVariants}
-          className="inline-block px-4 py-2 bg-primary/10 rounded-full border border-primary/20 mb-6"
-        >
-          <span className="text-sm font-medium text-primary">Welcome to</span>
-        </motion.div>
 
         {/* Main Headline */}
         <motion.h1

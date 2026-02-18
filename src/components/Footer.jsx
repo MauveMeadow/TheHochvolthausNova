@@ -1,91 +1,120 @@
 import { Link } from 'react-router-dom'
+import { Mail, Phone } from 'lucide-react'
 
 function Footer() {
   return (
-    <footer className="footer-section">
+    <footer style={styles.footer}>
       <div className="container">
-        <div className="footer-grid">
-          {/* Project Column */}
-          <div className="footer-column">
-            <h4 className="footer-heading">Project</h4>
-            <ul className="footer-links">
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/">The Concept</Link></li>
-              <li><Link to="/">The Hub</Link></li>
-              <li><Link to="/">Models 3D</Link></li>
-              <li><Link to="/">The Exchange</Link></li>
-              <li><Link to="/location-map">Location Map</Link></li>
-              <li><Link to="/building-timeline">Building Timeline</Link></li>
-            </ul>
-          </div>
-
-          {/* Resources Column */}
-          <div className="footer-column">
-            <h4 className="footer-heading">Resources</h4>
-            <ul className="footer-links">
-              <li><Link to="/analysis">Analysis Viewer</Link></li>
-              <li><Link to="/forma-analysis">Forma Analysis</Link></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Documentation</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">3D Models</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">IFC Files</a></li>
-            </ul>
-          </div>
-
-          {/* Community Column */}
-          <div className="footer-column">
-            <h4 className="footer-heading">Community</h4>
-            <ul className="footer-links">
-              <li><Link to="/get-involved">Get Involved</Link></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Events</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Workshops</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Contribute</a></li>
-            </ul>
-          </div>
-
-          {/* Support Column */}
-          <div className="footer-column">
-            <h4 className="footer-heading">Support</h4>
-            <ul className="footer-links">
-              <li><Link to="/contact">Contact Us</Link></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Help Center</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">FAQ</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Report Issue</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Feedback</a></li>
-            </ul>
-          </div>
-
-          {/* About Column */}
-          <div className="footer-column">
-            <h4 className="footer-heading">About</h4>
-            <ul className="footer-links">
-              <li><a href="#" target="_blank" rel="noopener noreferrer">About Us</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Privacy Policy</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Terms of Service</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Sitemap</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Careers</a></li>
-            </ul>
-          </div>
-
-          {/* Company Description */}
-          <div className="footer-info">
-            <h3 className="footer-title">Hochvolthaus Nova</h3>
-            <p className="footer-description">
-              Hochvolthaus Nova is an innovative research and demonstration project showcasing sustainable building technologies and smart energy solutions. We combine architecture, advanced analytics, and community engagement to create a modern learning space at TUM Campus in Munich, pioneering the future of high-performance, energy-efficient buildings.
+        <div style={styles.content}>
+          {/* Left side - Description */}
+          <div style={styles.descriptionSection}>
+            <h3 style={styles.title}>Hochvolthaus Nova</h3>
+            <p style={styles.description}>
+              An innovative research project showcasing sustainable building technologies 
+              and smart energy solutions at TUM Campus in Munich.
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* Footer Bottom */}
-      <div className="footer-bottom">
-        <div className="container">
-          <p className="footer-copyright">
-            © 2025 Hochvolthaus Nova. All rights reserved. Part of TUM Fusion Lab.
-          </p>
+          {/* Right side - Contact Info */}
+          <div style={styles.contactSection}>
+            <div style={styles.contactItem}>
+              <Mail size={18} style={styles.icon} />
+              <a href="mailto:fusionlab500@gmail.com" style={styles.contactLink}>
+                fusionlab500@gmail.com
+              </a>
+            </div>
+            <div style={styles.contactItem}>
+              <Phone size={18} style={styles.icon} />
+              <a href="tel:+4900000000" style={styles.contactLink}>
+                +49 (0) 0000000
+              </a>
+            </div>
+            <Link to="/contact" style={styles.contactUsLink}>
+              Contact Us →
+            </Link>
+          </div>
         </div>
+
+        {/* Divider */}
+        <div style={styles.divider} />
+
+        {/* Copyright */}
+        <p style={styles.copyright}>
+          © 2025 Hochvolthaus Nova. All rights reserved. Part of TUM Fusion Lab.
+        </p>
       </div>
     </footer>
   )
+}
+
+const styles = {
+  footer: {
+    backgroundColor: '#1d1d1f',
+    color: '#ffffff',
+    padding: '48px 0 24px 0',
+  },
+  content: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: '32px',
+  },
+  descriptionSection: {
+    flex: '1 1 300px',
+    maxWidth: '400px',
+  },
+  title: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '12px',
+    color: '#ffffff',
+  },
+  description: {
+    fontSize: '0.9rem',
+    lineHeight: '1.6',
+    color: 'rgba(255, 255, 255, 0.7)',
+    margin: 0,
+  },
+  contactSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  contactItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  icon: {
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  contactLink: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    transition: 'color 0.2s ease',
+  },
+  contactUsLink: {
+    display: 'inline-block',
+    marginTop: '8px',
+    color: '#007AFF',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'color 0.2s ease',
+  },
+  divider: {
+    height: '1px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    margin: '32px 0 24px 0',
+  },
+  copyright: {
+    fontSize: '0.8rem',
+    color: 'rgba(255, 255, 255, 0.5)',
+    margin: 0,
+    textAlign: 'center',
+  },
 }
 
 export default Footer

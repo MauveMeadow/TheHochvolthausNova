@@ -1,25 +1,38 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Phone, MapPin, Send, ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Send } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import Navigation from './Navigation'
 
 function Contact() {
+  const navigate = useNavigate()
+  
+  // Contact form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: '',
     message: ''
   })
-  
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
 
+  // Team members data with LinkedIn profile links
+  const teamMembers = [
+    { name: 'Samin Eghbali', linkedin: 'https://www.linkedin.com/in/samin-eghbali/' },
+    { name: 'Mays Alsheikh', linkedin: 'https://www.linkedin.com/in/maysalsheikh/' },
+    { name: 'Rafael Rodrigues', linkedin: 'https://www.linkedin.com/in/rafael-rodrigues/' },
+    { name: 'Chandana Mahesh', linkedin: 'https://www.linkedin.com/in/chandanam2907/' },
+    { name: 'Tianzhuo Wang', linkedin: 'https://www.linkedin.com/in/tianzhuo-wang/' },
+    { name: 'Antonia-Ioulia Pozatzidou', linkedin: 'https://www.linkedin.com/in/antonia-ioulia-pozatzidou/' },
+  ]
+
+  const handleTabChange = (tabId) => {
+    navigate('/', { state: { scrollTo: tabId } })
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e) => {
@@ -28,11 +41,10 @@ function Contact() {
     
     try {
       // Simulate form submission
-      setTimeout(() => {
-        setSubmitStatus('success')
-        setFormData({ name: '', email: '', subject: '', message: '' })
-        setTimeout(() => setSubmitStatus(null), 5000)
-      }, 1000)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setSubmitStatus('success')
+      setFormData({ name: '', email: '', message: '' })
+      setTimeout(() => setSubmitStatus(null), 5000)
     } catch (error) {
       setSubmitStatus('error')
       setTimeout(() => setSubmitStatus(null), 5000)
@@ -41,195 +53,282 @@ function Contact() {
     }
   }
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: 'Email',
-      content: 'fusionlab500@gmail.com',
-      href: 'mailto:fusionlab500@gmail.com'
-    },
-    {
-      icon: Phone,
-      title: 'Phone',
-      content: '+49 (0) 0000000',
-      href: 'tel:+4900000000'
-    },
-    {
-      icon: MapPin,
-      title: 'Location',
-      content: 'Theresienstr. 90, 80333 München',
-      href: 'https://www.google.com/maps/search/Theresienstr.+90,+80333+M%C3%BCnchen'
-    }
-  ]
-
   return (
-    <div className="min-h-screen pt-20 pb-20">
-      <div className="container">
-        <Link to="/" className="btn btn-secondary mb-8 w-fit">
-          <ArrowLeft size={20} />
-          <span>Back to Home</span>
-        </Link>
+    <>
+      <Navigation activeTab="" onTabChange={handleTabChange} />
+      <div className="min-h-screen pb-20" style={{ paddingTop: '160px' }}>
+        <div className="container">
         
+        {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
+          className="text-center mb-16"
+          style={{ marginTop: '40px' }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h1>
-          <p className="text-lg text-gray-600 max-w-2xl">
-            Have questions about the Hochvolthaus Nova? We'd love to hear from you. 
-            Reach out through any of the methods below or fill out the contact form.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Meet Our Team</h1>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12 mb-12">
-          {/* Contact Information */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="space-y-8"
-          >
-            <h2 className="text-2xl font-bold mb-8">Contact Information</h2>
-            
-            {contactInfo.map((info, index) => {
-              const Icon = info.icon
-              return (
-                <motion.a
-                  key={index}
-                  href={info.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + index * 0.1 }}
-                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 transition-colors !text-black hover:!text-black"
-                  style={{ textDecoration: 'none' }}
-                  target={info.href.startsWith('https') ? '_blank' : undefined}
-                  rel={info.href.startsWith('https') ? 'noopener noreferrer' : undefined}
-                >
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-foreground text-background">
-                      <Icon size={24} />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold !text-black">{info.title}</h3>
-                    <p className="text-gray-600">{info.content}</p>
-                  </div>
-                </motion.a>
-              )
-            })}
-
-            <div className="mt-12 p-6 bg-secondary rounded-lg">
-              <h3 className="font-semibold text-lg mb-2">Business Hours</h3>
-              <p className="text-gray-600">Monday - Friday: 9:00 AM - 5:00 PM</p>
-              <p className="text-gray-600">Saturday & Sunday: Closed</p>
-            </div>
-          </motion.div>
-
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground"
-                  placeholder="Your name"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground"
-                  placeholder="your@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground"
-                  placeholder="How can we help?"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows="5"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground resize-none"
-                  placeholder="Your message..."
-                />
-              </div>
-
-              {submitStatus === 'success' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800"
-                >
-                  Thank you! We've received your message and will get back to you soon.
-                </motion.div>
-              )}
-
-              {submitStatus === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800"
-                >
-                  Something went wrong. Please try again.
-                </motion.div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full btn btn-primary flex items-center justify-center space-x-2"
+        {/* Team Members Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-20"
+        >
+          {teamMembers.map((member, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.1 }}
+              className="flex flex-col items-center text-center"
+            >
+              {/* Circular Profile Container */}
+              <div 
+                style={{
+                  width: '120px',
+                  height: '120px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f0f0f0',
+                  border: '3px solid #001960',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '16px',
+                  overflow: 'hidden',
+                }}
               >
-                <Send size={20} />
-                <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
-              </button>
-            </form>
-          </motion.div>
-        </div>
+                {/* Placeholder - initials */}
+                <span style={{ 
+                  fontSize: '32px', 
+                  fontWeight: '600', 
+                  color: '#001960' 
+                }}>
+                  {member.name.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+              
+              {/* Name */}
+              <h3 style={{ 
+                fontSize: '0.9375rem', 
+                fontWeight: '500', 
+                marginBottom: '8px',
+                color: '#1d1d1f',
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
+              }}>
+                {member.name}
+              </h3>
+              
+              {/* LinkedIn Icon */}
+              <a 
+                href={member.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  border: '1.5px solid #666',
+                  backgroundColor: 'transparent',
+                  color: '#666',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)'
+                  e.currentTarget.style.borderColor = '#1d1d1f'
+                  e.currentTarget.style.color = '#1d1d1f'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)'
+                  e.currentTarget.style.borderColor = '#666'
+                  e.currentTarget.style.color = '#666'
+                }}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect width="4" height="12" x="2" y="9"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              </a>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Contact Form Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            marginTop: '60px',
+            padding: '40px',
+            backgroundColor: '#f9f9f9',
+            borderRadius: '16px',
+          }}
+        >
+          <h2 style={{ 
+            fontSize: '1.75rem', 
+            fontWeight: '600', 
+            marginBottom: '8px',
+            textAlign: 'center',
+            color: '#1d1d1f'
+          }}>
+            Send Us a Message
+          </h2>
+          <p style={{ 
+            fontSize: '0.95rem', 
+            color: '#666',
+            textAlign: 'center',
+            marginBottom: '24px'
+          }}>
+            Have questions or feedback? We'd love to hear from you.
+          </p>
+          
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label htmlFor="name" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '6px' }}>
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="Your name"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="email" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '6px' }}>
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="your@email.com"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="message" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '6px' }}>
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                rows="5"
+                placeholder="Your message..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  resize: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {submitStatus === 'success' && (
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#d4edda',
+                border: '1px solid #c3e6cb',
+                borderRadius: '8px',
+                color: '#155724',
+                fontSize: '0.9rem'
+              }}>
+                Thank you! Your message has been sent successfully.
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#f8d7da',
+                border: '1px solid #f5c6cb',
+                borderRadius: '8px',
+                color: '#721c24',
+                fontSize: '0.9rem'
+              }}>
+                Something went wrong. Please try again.
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '14px 24px',
+                backgroundColor: '#001960',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.7 : 1,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Send size={18} />
+              {isSubmitting ? 'Sending...' : 'Send Message'}
+            </button>
+          </form>
+        </motion.div>
+
       </div>
     </div>
+    </>
   )
 }
 

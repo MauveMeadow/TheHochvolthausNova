@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import Navigation from './Navigation'
 
 function SignUp() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -12,8 +14,14 @@ function SignUp() {
     console.log('Sign up:', { email, password })
   }
 
+  const handleTabChange = (tabId) => {
+    navigate('/', { state: { scrollTo: tabId } })
+  }
+
   return (
-    <div className="auth-page">
+    <>
+      <Navigation activeTab="" onTabChange={handleTabChange} />
+      <div className="auth-page">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -58,6 +66,7 @@ function SignUp() {
         </p>
       </motion.div>
     </div>
+    </>
   )
 }
 
