@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as WebIFC from 'web-ifc';
-import { Grid } from 'lucide-react';
+import { Grid, Scissors, Trash2, Eye, EyeOff, Move, Maximize2, Minimize2 } from 'lucide-react';
 
 // IFC Type names mapping
 const IFC_TYPES = {
@@ -50,6 +50,10 @@ const IFCViewer = () => {
   const originalMaterialsRef = useRef(new Map());
   const gridRef = useRef(null);
   const modelBaseYRef = useRef(0); // Store the model's base Y position
+  const planeHelpersRef = useRef([]); // Store plane helper visualizations
+  const dragPlaneRef = useRef(null); // The clipping plane being dragged
+  const dragStartPointRef = useRef(null); // Starting point of drag
+  const isDraggingPlaneRef = useRef(false); // Whether we're currently dragging a plane
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -67,6 +71,17 @@ const IFCViewer = () => {
   // Grid settings state
   const [gridVisible, setGridVisible] = useState(true);
   const [gridElevation, setGridElevation] = useState(0);
+  
+  // Clipping plane state
+  const [clippingEnabled, setClippingEnabled] = useState(true);
+  const [clippingPlanes, setClippingPlanes] = useState([]); // Array of {id, plane, enabled, position, normal}
+  const [clipperMode, setClipperMode] = useState(false); // Whether double-click creates clipping planes
+  const [selectedClipPlane, setSelectedClipPlane] = useState(null); // Currently selected plane for dragging
+  const [isDraggingClipPlane, setIsDraggingClipPlane] = useState(false); // UI state for dragging
+  const [isHoveringClipPlane, setIsHoveringClipPlane] = useState(false); // Cursor state for hovering
+  
+  // Maximize state
+  const [isMaximized, setIsMaximized] = useState(false);
 
   // Get element properties from IFC
   const getElementProperties = useCallback(async (expressId) => {
@@ -445,6 +460,7 @@ const IFCViewer = () => {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.localClippingEnabled = true; // Enable clipping planes support
         container.appendChild(renderer.domElement);
         rendererRef.current = renderer;
 
@@ -791,6 +807,36 @@ const IFCViewer = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Handle resize when maximized state changes
+  useEffect(() => {
+    if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+    
+    // Small delay to allow CSS transition to complete
+    const timer = setTimeout(() => {
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+      
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+      
+      rendererRef.current.setSize(width, height);
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, [isMaximized]);
+
+  // Handle Escape key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isMaximized) {
+        setIsMaximized(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMaximized]);
+
   // Update grid visibility
   useEffect(() => {
     if (gridRef.current) {
@@ -808,6 +854,455 @@ const IFCViewer = () => {
       console.log('Grid elevation updated to:', newY, '(base:', modelBaseYRef.current, '+ offset:', gridElevation, ')');
     }
   }, [gridElevation]);
+
+  // Update renderer clipping planes when clipping state changes
+  useEffect(() => {
+    if (!sceneRef.current) return;
+    
+    const activePlanes = clippingPlanes
+      .filter(cp => cp.enabled && clippingEnabled)
+      .map(cp => cp.plane);
+    
+    // Apply clipping planes to all materials in the scene
+    sceneRef.current.traverse((object) => {
+      if (object.isMesh && object.material) {
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach(material => {
+          material.clippingPlanes = activePlanes.length > 0 ? activePlanes : null;
+          material.clipShadows = true;
+          material.needsUpdate = true;
+        });
+      }
+    });
+    
+    // Update plane helper visibility
+    planeHelpersRef.current.forEach(helper => {
+      const clipPlane = clippingPlanes.find(cp => cp.id === helper.userData.clipId);
+      if (clipPlane) {
+        helper.visible = clipPlane.enabled && clippingEnabled;
+      }
+    });
+  }, [clippingPlanes, clippingEnabled]);
+
+  // Create a new clipping plane at intersection point
+  const createClippingPlane = useCallback((point, normal) => {
+    // Use the face normal directly - it points outward from the clicked surface
+    // We'll use this for visualization, but invert it for the actual clipping plane
+    // so it doesn't cut anything initially
+    const clippingNormal = normal.clone().negate(); // Inverted for clipping (points INTO model)
+    
+    const plane = new THREE.Plane();
+    plane.setFromNormalAndCoplanarPoint(clippingNormal, point);
+    
+    const id = Date.now();
+    const newClippingPlane = {
+      id,
+      plane,
+      enabled: true,
+      position: point.clone(),
+      normal: clippingNormal.clone(),
+    };
+
+    // Create a visual helper group for the clipping plane
+    const helperGroup = new THREE.Group();
+    helperGroup.userData.clipId = id;
+    helperGroup.userData.isHelper = true;
+    helperGroup.userData.normal = clippingNormal.clone();
+    
+    // Arrow parameters
+    const arrowLength = 12;
+    const arrowHeadLength = 4.5;
+    const arrowHeadRadius = 2.2;
+    
+    // Create arrow using Three.js ArrowHelper for simplicity and reliability
+    // Red arrow - points in clipping normal direction (INTO the model, cutting direction)
+    const redArrowDir = clippingNormal.clone().normalize();
+    const redArrow = new THREE.ArrowHelper(
+      redArrowDir,
+      new THREE.Vector3(0, 0, 0),
+      arrowLength,
+      0xff0000, // Red
+      arrowHeadLength,
+      arrowHeadRadius
+    );
+    redArrow.userData.clipId = id;
+    redArrow.userData.isHelper = true;
+    redArrow.userData.isArrow = true;
+    redArrow.userData.isDraggable = true;
+    redArrow.userData.arrowDirection = 1;
+    redArrow.renderOrder = 999; // Render on top
+    redArrow.traverse((child) => {
+      child.userData.clipId = id;
+      child.userData.isHelper = true;
+      child.userData.isArrow = true;
+      child.userData.isDraggable = true;
+      child.userData.arrowDirection = 1;
+      child.renderOrder = 999;
+      if (child.material) {
+        child.material.side = THREE.DoubleSide;
+        child.material.depthTest = false; // Always render on top
+        child.material.depthWrite = false;
+        child.material.transparent = true;
+        child.material.clippingPlanes = null;
+      }
+    });
+    
+    // Blue arrow - points OPPOSITE to clipping normal (OUT of model)
+    // Use the original face normal directly (not inverted)
+    const blueArrowDir = normal.clone().normalize();
+    const blueArrow = new THREE.ArrowHelper(
+      blueArrowDir,
+      new THREE.Vector3(0, 0, 0),
+      arrowLength,
+      0x0066ff, // Blue
+      arrowHeadLength,
+      arrowHeadRadius
+    );
+    blueArrow.userData.clipId = id;
+    blueArrow.userData.isHelper = true;
+    blueArrow.userData.isArrow = true;
+    blueArrow.userData.isDraggable = true;
+    blueArrow.userData.arrowDirection = -1;
+    blueArrow.renderOrder = 999; // Render on top
+    // Fix visibility - always render on top
+    blueArrow.traverse((child) => {
+      child.userData.clipId = id;
+      child.userData.isHelper = true;
+      child.userData.isArrow = true;
+      child.userData.isDraggable = true;
+      child.userData.arrowDirection = -1;
+      child.renderOrder = 999;
+      if (child.material) {
+        child.material.side = THREE.DoubleSide;
+        child.material.depthTest = false; // Always render on top
+        child.material.depthWrite = false;
+        child.material.transparent = true;
+        child.material.clippingPlanes = null;
+      }
+    });
+    
+    // Create a ring/circle to show the clipping plane position
+    const ringGeometry = new THREE.RingGeometry(3, 4, 32);
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      transparent: true,
+      opacity: 0.5,
+      side: THREE.DoubleSide,
+      depthTest: false, // Always render on top
+      depthWrite: false,
+    });
+    const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+    ringMesh.renderOrder = 999;
+    ringMesh.userData.clipId = id;
+    ringMesh.userData.isHelper = true;
+    
+    // Orient the ring to be perpendicular to the normal
+    ringMesh.lookAt(clippingNormal);
+    
+    helperGroup.add(redArrow);
+    helperGroup.add(blueArrow);
+    helperGroup.add(ringMesh);
+    
+    // Position the helper at the click point
+    helperGroup.position.copy(point);
+    
+    // Store reference to the plane for updating
+    helperGroup.userData.plane = plane;
+    
+    if (sceneRef.current) {
+      sceneRef.current.add(helperGroup);
+    }
+    planeHelpersRef.current.push(helperGroup);
+
+    setClippingPlanes(prev => [...prev, newClippingPlane]);
+    console.log('Created clipping plane at:', point, 'with normal:', clippingNormal);
+  }, []);
+
+  // Toggle a specific clipping plane
+  const toggleClippingPlane = useCallback((id) => {
+    setClippingPlanes(prev => prev.map(cp => 
+      cp.id === id ? { ...cp, enabled: !cp.enabled } : cp
+    ));
+    
+    // Update helper visibility
+    const helper = planeHelpersRef.current.find(h => h.userData.clipId === id);
+    if (helper) {
+      helper.visible = !helper.visible;
+    }
+  }, []);
+
+  // Remove a specific clipping plane
+  const removeClippingPlane = useCallback((id) => {
+    setClippingPlanes(prev => prev.filter(cp => cp.id !== id));
+    if (selectedClipPlane === id) {
+      setSelectedClipPlane(null);
+    }
+    
+    // Remove helper from scene
+    const helperIndex = planeHelpersRef.current.findIndex(h => h.userData.clipId === id);
+    if (helperIndex !== -1) {
+      const helper = planeHelpersRef.current[helperIndex];
+      if (sceneRef.current) {
+        sceneRef.current.remove(helper);
+      }
+      // Dispose all children (mesh, lines, etc.)
+      helper.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(m => m.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
+      planeHelpersRef.current.splice(helperIndex, 1);
+    }
+  }, []);
+
+  // Remove all clipping planes
+  const removeAllClippingPlanes = useCallback(() => {
+    setClippingPlanes([]);
+    setSelectedClipPlane(null);
+    
+    // Remove all helpers from scene
+    planeHelpersRef.current.forEach(helper => {
+      if (sceneRef.current) {
+        sceneRef.current.remove(helper);
+      }
+      // Dispose all children
+      helper.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(m => m.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
+    });
+    planeHelpersRef.current = [];
+  }, []);
+
+  // Move a clipping plane along its normal by a distance
+  const moveClippingPlane = useCallback((id, distance) => {
+    setClippingPlanes(prev => prev.map(cp => {
+      if (cp.id !== id) return cp;
+      
+      // Move the position along the normal
+      const newPosition = cp.position.clone().addScaledVector(cp.normal, distance);
+      
+      // Create a new plane at the new position
+      const newPlane = new THREE.Plane();
+      newPlane.setFromNormalAndCoplanarPoint(cp.normal, newPosition);
+      
+      // Update the helper position (it's now a Group)
+      const helper = planeHelpersRef.current.find(h => h.userData.clipId === id);
+      if (helper) {
+        helper.position.copy(newPosition);
+        helper.userData.plane = newPlane;
+      }
+      
+      return {
+        ...cp,
+        plane: newPlane,
+        position: newPosition,
+      };
+    }));
+  }, []);
+
+  // Handle mouse down on arrow for dragging
+  const handlePlaneMouseDown = useCallback((event) => {
+    if (!clipperMode || !containerRef.current || !cameraRef.current || !sceneRef.current) return;
+    if (clippingPlanes.length === 0) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycasterRef.current.setFromCamera(new THREE.Vector2(x, y), cameraRef.current);
+    
+    // Check if we're clicking on a draggable arrow
+    const helpers = planeHelpersRef.current.filter(h => h.visible);
+    const intersects = raycasterRef.current.intersectObjects(helpers, true);
+    
+    if (intersects.length > 0) {
+      // Check if we clicked on the arrow (draggable part)
+      const clickedObject = intersects[0].object;
+      
+      // Only start dragging if we clicked on the arrow
+      if (!clickedObject.userData.isDraggable && !clickedObject.userData.isArrow) {
+        return;
+      }
+      
+      // Find the parent helper group with clipId
+      let helperGroup = clickedObject;
+      while (helperGroup && !helperGroup.userData.clipId) {
+        helperGroup = helperGroup.parent;
+      }
+      
+      if (helperGroup && helperGroup.userData.clipId) {
+        const clipPlane = clippingPlanes.find(cp => cp.id === helperGroup.userData.clipId);
+        if (clipPlane) {
+          event.stopPropagation();
+          event.preventDefault();
+          isDraggingPlaneRef.current = true;
+          dragPlaneRef.current = clipPlane;
+          dragStartPointRef.current = intersects[0].point.clone();
+          setSelectedClipPlane(clipPlane.id);
+          setIsDraggingClipPlane(true);
+          
+          // Disable orbit controls while dragging
+          if (controlsRef.current) {
+            controlsRef.current.enabled = false;
+          }
+        }
+      }
+    }
+  }, [clipperMode, clippingPlanes]);
+
+  // Handle mouse move for dragging plane
+  const handlePlaneMouseMove = useCallback((event) => {
+    if (!isDraggingPlaneRef.current || !dragPlaneRef.current || !containerRef.current || !cameraRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // Create a plane perpendicular to camera for mouse tracking
+    const cameraDirection = new THREE.Vector3();
+    cameraRef.current.getWorldDirection(cameraDirection);
+    
+    const trackingPlane = new THREE.Plane();
+    trackingPlane.setFromNormalAndCoplanarPoint(cameraDirection, dragStartPointRef.current);
+    
+    raycasterRef.current.setFromCamera(new THREE.Vector2(x, y), cameraRef.current);
+    
+    const currentPoint = new THREE.Vector3();
+    raycasterRef.current.ray.intersectPlane(trackingPlane, currentPoint);
+    
+    if (currentPoint) {
+      // Calculate movement along the clipping plane's normal
+      const movement = currentPoint.clone().sub(dragStartPointRef.current);
+      const distance = movement.dot(dragPlaneRef.current.normal);
+      
+      if (Math.abs(distance) > 0.01) {
+        moveClippingPlane(dragPlaneRef.current.id, distance);
+        dragStartPointRef.current = currentPoint.clone();
+        
+        // Update the dragPlaneRef to the updated plane
+        const updatedPlane = clippingPlanes.find(cp => cp.id === dragPlaneRef.current.id);
+        if (updatedPlane) {
+          dragPlaneRef.current = updatedPlane;
+        }
+      }
+    }
+  }, [clippingPlanes, moveClippingPlane]);
+
+  // Handle mouse up to stop dragging
+  const handlePlaneMouseUp = useCallback(() => {
+    if (isDraggingPlaneRef.current) {
+      isDraggingPlaneRef.current = false;
+      dragPlaneRef.current = null;
+      dragStartPointRef.current = null;
+      setIsDraggingClipPlane(false);
+      
+      // Re-enable orbit controls
+      if (controlsRef.current) {
+        controlsRef.current.enabled = true;
+      }
+    }
+  }, []);
+
+  // Add drag event listeners
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !modelLoaded) return;
+
+    // Hover detection for arrow handles
+    const handleMouseMoveForHover = (event) => {
+      if (!clipperMode || isDraggingPlaneRef.current || planeHelpersRef.current.length === 0) {
+        if (isHoveringClipPlane) setIsHoveringClipPlane(false);
+        return;
+      }
+      
+      const rect = container.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycasterRef.current.setFromCamera(new THREE.Vector2(x, y), cameraRef.current);
+      const helpers = planeHelpersRef.current.filter(h => h.visible);
+      const intersects = raycasterRef.current.intersectObjects(helpers, true);
+      
+      // Only show grab cursor when hovering over the arrow (draggable part)
+      let isOverArrow = false;
+      if (intersects.length > 0) {
+        const hoveredObject = intersects[0].object;
+        isOverArrow = hoveredObject.userData.isDraggable || hoveredObject.userData.isArrow;
+      }
+      
+      setIsHoveringClipPlane(isOverArrow);
+    };
+
+    container.addEventListener('mousedown', handlePlaneMouseDown);
+    container.addEventListener('mousemove', handleMouseMoveForHover);
+    window.addEventListener('mousemove', handlePlaneMouseMove);
+    window.addEventListener('mouseup', handlePlaneMouseUp);
+    
+    return () => {
+      container.removeEventListener('mousedown', handlePlaneMouseDown);
+      container.removeEventListener('mousemove', handleMouseMoveForHover);
+      window.removeEventListener('mousemove', handlePlaneMouseMove);
+      window.removeEventListener('mouseup', handlePlaneMouseUp);
+    };
+  }, [modelLoaded, clipperMode, isHoveringClipPlane, handlePlaneMouseDown, handlePlaneMouseMove, handlePlaneMouseUp]);
+
+  // Handle double-click for creating clipping planes
+  const handleDoubleClick = useCallback((event) => {
+    if (!clipperMode || !containerRef.current || !cameraRef.current || !sceneRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycasterRef.current.setFromCamera(new THREE.Vector2(x, y), cameraRef.current);
+    
+    // Get all meshes from the scene (excluding helpers, grid, etc.)
+    const meshes = [];
+    sceneRef.current.traverse((object) => {
+      if (object.isMesh && !object.userData.isHelper && object.name !== 'InfiniteGrid') {
+        meshes.push(object);
+      }
+    });
+
+    const intersects = raycasterRef.current.intersectObjects(meshes, true);
+    
+    if (intersects.length > 0) {
+      const intersection = intersects[0];
+      const point = intersection.point.clone();
+      
+      // Use the face normal to align the clipping plane with the surface
+      const faceNormal = intersection.face.normal.clone();
+      
+      // Transform normal from local to world space
+      const normalMatrix = new THREE.Matrix3().getNormalMatrix(intersection.object.matrixWorld);
+      faceNormal.applyMatrix3(normalMatrix).normalize();
+      
+      // The clipping plane cuts everything on the positive side of the normal
+      // So we use the face normal (pointing outward from the surface)
+      createClippingPlane(point, faceNormal);
+    }
+  }, [clipperMode, createClippingPlane]);
+
+  // Add double-click event listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !modelLoaded) return;
+
+    container.addEventListener('dblclick', handleDoubleClick);
+    return () => container.removeEventListener('dblclick', handleDoubleClick);
+  }, [modelLoaded, handleDoubleClick]);
 
   // Render spatial structure tree
   const renderStructureTree = (nodes, level = 0) => {
@@ -834,7 +1329,20 @@ const IFCViewer = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={{
+      ...styles.container,
+      ...(isMaximized ? styles.containerMaximized : {}),
+      cursor: isDraggingClipPlane ? 'grabbing' : (isHoveringClipPlane ? 'grab' : 'default')
+    }}>
+      {/* Maximize/Minimize Button */}
+      <button
+        style={styles.maximizeButton}
+        onClick={() => setIsMaximized(!isMaximized)}
+        title={isMaximized ? 'Exit Fullscreen' : 'Fullscreen'}
+      >
+        {isMaximized ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+      </button>
+
       {/* 3D Viewer Container */}
       <div ref={containerRef} style={styles.canvas} />
 
@@ -873,7 +1381,7 @@ const IFCViewer = () => {
             style={styles.toggleButton}
             onClick={() => setShowInfoPanel(!showInfoPanel)}
           >
-            {showInfoPanel ? '✕' : 'ℹ️'}
+            {showInfoPanel ? '✕' : 'Layers'}
           </button>
 
           {showInfoPanel && (
@@ -917,6 +1425,15 @@ const IFCViewer = () => {
                   onClick={() => setActiveTab('grid')}
                 >
                   Grid
+                </button>
+                <button
+                  style={{
+                    ...styles.tab,
+                    ...(activeTab === 'clipper' ? styles.activeTab : {})
+                  }}
+                  onClick={() => setActiveTab('clipper')}
+                >
+                  Clipper
                 </button>
               </div>
 
@@ -1123,6 +1640,114 @@ const IFCViewer = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Clipper Tab */}
+                {activeTab === 'clipper' && (
+                  <div style={styles.gridSettingsContainer}>
+                    <p style={styles.hint}>
+                      <Scissors size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                      Create clipping planes to section the model
+                    </p>
+                    
+                    {/* Clipper Mode Toggle */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridToggleLabel}>
+                        <input
+                          type="checkbox"
+                          checked={clipperMode}
+                          onChange={(e) => setClipperMode(e.target.checked)}
+                          style={styles.gridCheckbox}
+                        />
+                        <span>Enable Clipper Mode</span>
+                      </label>
+                      <p style={styles.gridDescription}>
+                        {clipperMode 
+                          ? '✓ Double-click to create. Drag red arrow (cut more) or blue arrow (cut less).' 
+                          : 'Enable to create clipping planes by double-clicking'}
+                      </p>
+                    </div>
+
+                    {/* Global Clipping Toggle */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridToggleLabel}>
+                        <input
+                          type="checkbox"
+                          checked={clippingEnabled}
+                          onChange={(e) => setClippingEnabled(e.target.checked)}
+                          style={styles.gridCheckbox}
+                        />
+                        <span>Enable Clipping</span>
+                      </label>
+                      <p style={styles.gridDescription}>
+                        Toggle all clipping planes on/off
+                      </p>
+                    </div>
+
+                    {/* Clipping Planes List */}
+                    <div style={styles.gridControlSection}>
+                      <div style={styles.clipperHeader}>
+                        <label style={styles.gridSliderLabel}>
+                          Clipping Planes ({clippingPlanes.length})
+                        </label>
+                        {clippingPlanes.length > 0 && (
+                          <button
+                            style={styles.clipperRemoveAllBtn}
+                            onClick={removeAllClippingPlanes}
+                          >
+                            <Trash2 size={14} /> Clear All
+                          </button>
+                        )}
+                      </div>
+                      
+                      {clippingPlanes.length === 0 ? (
+                        <p style={styles.gridDescription}>
+                          No clipping planes yet. Enable Clipper Mode and double-click on a surface. Drag the red or blue arrows to adjust the cut.
+                        </p>
+                      ) : (
+                        <div style={styles.clipperPlanesList}>
+                          {clippingPlanes.map((cp, index) => (
+                            <div 
+                              key={cp.id} 
+                              style={{
+                                ...styles.clipperPlaneItem,
+                                ...(selectedClipPlane === cp.id ? styles.clipperPlaneItemSelected : {})
+                              }}
+                            >
+                              <div style={styles.clipperPlaneInfo}>
+                                <div style={styles.clipperPlaneNameRow}>
+                                  <Move size={14} style={{ opacity: 0.5, marginRight: '6px' }} />
+                                  <span style={styles.clipperPlaneName}>Plane {index + 1}</span>
+                                </div>
+                                <span style={styles.clipperPlanePos}>
+                                  ({cp.position.x.toFixed(1)}, {cp.position.y.toFixed(1)}, {cp.position.z.toFixed(1)})
+                                </span>
+                              </div>
+                              <div style={styles.clipperPlaneActions}>
+                                <button
+                                  style={{
+                                    ...styles.clipperActionBtn,
+                                    ...(cp.enabled ? {} : styles.clipperDisabledBtn)
+                                  }}
+                                  onClick={() => toggleClippingPlane(cp.id)}
+                                  title={cp.enabled ? 'Disable plane' : 'Enable plane'}
+                                >
+                                  {cp.enabled ? <Eye size={16} /> : <EyeOff size={16} />}
+                                </button>
+                                <button
+                                  style={{...styles.clipperActionBtn, ...styles.clipperDeleteBtn}}
+                                  onClick={() => removeClippingPlane(cp.id)}
+                                  title="Remove plane"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1136,6 +1761,24 @@ const IFCViewer = () => {
           {selectedElement && (
             <span> | Selected: #{selectedElement.expressId}</span>
           )}
+          {clippingPlanes.length > 0 && (
+            <span> | ✂️ {clippingPlanes.filter(cp => cp.enabled).length} clips active</span>
+          )}
+        </div>
+      )}
+
+      {/* Clipper Mode Indicator */}
+      {clipperMode && modelLoaded && !isLoading && (
+        <div style={{
+          ...styles.clipperModeIndicator,
+          ...(isDraggingClipPlane ? { backgroundColor: 'rgba(0, 200, 83, 0.9)' } : {})
+        }}>
+          <Scissors size={16} />
+          <span>
+            {isDraggingClipPlane 
+              ? 'Dragging... Move to cut the model' 
+              : 'Clipper Mode: Double-click to create. Drag arrows to move plane.'}
+          </span>
         </div>
       )}
 
@@ -1145,6 +1788,8 @@ const IFCViewer = () => {
         <p>🖱️ Right-click + drag: Pan</p>
         <p>🖱️ Scroll: Zoom</p>
         <p>🖱️ Click element: Select</p>
+        {clipperMode && <p>✂️ Double-click: Create clip plane</p>}
+        {clipperMode && clippingPlanes.length > 0 && <p>🔴 Red arrow: Cut more | 🔵 Blue arrow: Cut less</p>}
       </div>
     </div>
   );
@@ -1157,6 +1802,35 @@ const styles = {
     height: '100vh',
     overflow: 'hidden',
     backgroundColor: '#202932',
+    transition: 'all 0.3s ease',
+  },
+  containerMaximized: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100vw',
+    height: '100vh',
+    zIndex: 9999,
+  },
+  maximizeButton: {
+    position: 'absolute',
+    top: '20px',
+    left: '20px',
+    zIndex: 100,
+    width: '44px',
+    height: '44px',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
+    color: '#ffffff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.2s ease',
   },
   canvas: {
     width: '100%',
@@ -1247,6 +1921,23 @@ const styles = {
     backdropFilter: 'blur(10px)',
     zIndex: 10,
   },
+  clipperModeIndicator: {
+    position: 'absolute',
+    top: '80px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'rgba(255, 149, 0, 0.9)',
+    color: '#ffffff',
+    padding: '10px 20px',
+    borderRadius: '20px',
+    fontSize: '14px',
+    fontWeight: '500',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    zIndex: 25,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+  },
   controlsInfo: {
     position: 'absolute',
     bottom: '20px',
@@ -1264,13 +1955,15 @@ const styles = {
     position: 'absolute',
     top: '20px',
     right: '20px',
-    width: '40px',
+    minWidth: '40px',
     height: '40px',
+    padding: '0 14px',
     backgroundColor: 'rgba(0, 122, 255, 0.9)',
     color: '#ffffff',
     border: 'none',
-    borderRadius: '50%',
-    fontSize: '16px',
+    borderRadius: '20px',
+    fontSize: '14px',
+    fontWeight: '500',
     cursor: 'pointer',
     zIndex: 20,
     display: 'flex',
@@ -1508,6 +2201,89 @@ const styles = {
     fontSize: '11px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+  },
+  // Clipper styles
+  clipperHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '12px',
+  },
+  clipperRemoveAllBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '6px 10px',
+    backgroundColor: 'rgba(255, 59, 48, 0.2)',
+    border: '1px solid rgba(255, 59, 48, 0.4)',
+    borderRadius: '4px',
+    color: '#ff3b30',
+    fontSize: '11px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  clipperPlanesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  clipperPlaneItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  clipperPlaneInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  clipperPlaneNameRow: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  clipperPlaneName: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  clipperPlanePos: {
+    fontSize: '10px',
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontFamily: 'monospace',
+    marginLeft: '20px',
+  },
+  clipperPlaneActions: {
+    display: 'flex',
+    gap: '6px',
+  },
+  clipperActionBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '32px',
+    height: '32px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '6px',
+    color: '#ffffff',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  clipperDisabledBtn: {
+    opacity: 0.5,
+  },
+  clipperDeleteBtn: {
+    backgroundColor: 'rgba(255, 59, 48, 0.2)',
+    borderColor: 'rgba(255, 59, 48, 0.4)',
+    color: '#ff3b30',
+  },
+  clipperPlaneItemSelected: {
+    borderColor: '#007AFF',
+    backgroundColor: 'rgba(0, 122, 255, 0.15)',
   },
 };
 
