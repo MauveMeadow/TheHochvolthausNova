@@ -36,7 +36,6 @@ function Footer() {
             <h4 className="footer-heading">Community</h4>
             <ul className="footer-links">
               <li><Link to="/get-involved">Get Involved</Link></li>
-              <li><Link to="/reservations">Room Reservation</Link></li>
               <li><a href="#" target="_blank" rel="noopener noreferrer">Events</a></li>
               <li><a href="#" target="_blank" rel="noopener noreferrer">Workshops</a></li>
               <li><a href="#" target="_blank" rel="noopener noreferrer">Contribute</a></li>

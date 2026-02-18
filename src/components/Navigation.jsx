@@ -34,9 +34,6 @@ function Navigation({ activeTab, onTabChange }) {
                   {tab.label}
                 </button>
               ))}
-              <Link to="/reservations" className="tab reservations-link">
-                Reservations
-              </Link>
               <Link to="/contact" className="tab contact-link">
                 Contact
               </Link>
@@ -79,13 +76,6 @@ function Navigation({ activeTab, onTabChange }) {
                 {tab.label}
               </button>
             ))}
-            <Link 
-              to="/reservations" 
-              className="block w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-secondary"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Reservations
-            </Link>
             <Link 
               to="/contact" 
               className="block w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-secondary"

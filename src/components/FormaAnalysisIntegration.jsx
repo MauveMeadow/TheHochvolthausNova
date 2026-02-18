@@ -4,6 +4,97 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as WebIFC from 'web-ifc';
 import { Sun, Wind, Volume2, Leaf, Cloud, Zap, Upload, Download, Eye, EyeOff } from 'lucide-react';
 
+// Fancy Infinite Grid Shader
+const createInfiniteGrid = (options = {}) => {
+  const {
+    size = 100,
+    divisions = 100,
+    color1 = new THREE.Color(0x444444),
+    color2 = new THREE.Color(0x888888),
+    fadeDistance = 100,
+    fadeStrength = 1,
+  } = options;
+
+  const gridShader = {
+    uniforms: {
+      uColor1: { value: color1 },
+      uColor2: { value: color2 },
+      uSize1: { value: 1.0 },
+      uSize2: { value: 10.0 },
+      uDistance: { value: fadeDistance },
+      uFadeStrength: { value: fadeStrength },
+    },
+    vertexShader: `
+      varying vec3 vWorldPosition;
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPosition.xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      uniform float uSize1;
+      uniform float uSize2;
+      uniform float uDistance;
+      uniform float uFadeStrength;
+      
+      varying vec3 vWorldPosition;
+      
+      float getGrid(float size) {
+        vec2 r = vWorldPosition.xz / size;
+        vec2 grid = abs(fract(r - 0.5) - 0.5) / fwidth(r);
+        float line = min(grid.x, grid.y);
+        return 1.0 - min(line, 1.0);
+      }
+      
+      void main() {
+        float d = 1.0 - min(length(vWorldPosition.xz) / uDistance, 1.0);
+        float g1 = getGrid(uSize1);
+        float g2 = getGrid(uSize2);
+        
+        vec3 color = mix(uColor1, uColor2, min(1.0, g2));
+        float alpha = mix(g1 * 0.5, 1.0, g2) * pow(d, uFadeStrength);
+        
+        gl_FragColor = vec4(color, alpha * 0.5);
+        gl_FragColor.rgb *= gl_FragColor.a;
+      }
+    `,
+  };
+
+  const geometry = new THREE.PlaneGeometry(size * 2, size * 2, 1, 1);
+  const material = new THREE.ShaderMaterial({
+    ...gridShader,
+    side: THREE.DoubleSide,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  const grid = new THREE.Mesh(geometry, material);
+  grid.rotation.x = -Math.PI / 2;
+  grid.frustumCulled = false;
+  grid.name = 'InfiniteGrid';
+
+  // Add methods to control the grid
+  grid.setColors = (primary, secondary) => {
+    material.uniforms.uColor1.value = new THREE.Color(primary);
+    material.uniforms.uColor2.value = new THREE.Color(secondary);
+  };
+
+  grid.setSizes = (primary, secondary) => {
+    material.uniforms.uSize1.value = primary;
+    material.uniforms.uSize2.value = secondary;
+  };
+
+  grid.setFade = (distance, strength) => {
+    material.uniforms.uDistance.value = distance;
+    material.uniforms.uFadeStrength.value = strength;
+  };
+
+  return grid;
+};
+
 // Analysis data
 const ANALYSIS_TYPES = {
   'sun-hours': {
@@ -98,6 +189,7 @@ const FormaAnalysisIntegration = () => {
   const disposedRef = useRef(false);
   const ifcApiRef = useRef(null);
   const modelIDRef = useRef(null);
+  const gridRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -107,6 +199,13 @@ const FormaAnalysisIntegration = () => {
   const [showAnalysisOverlay, setShowAnalysisOverlay] = useState(true);
   const [selectedElement, setSelectedElement] = useState(null);
   const [analysisOpacity, setAnalysisOpacity] = useState(0.7);
+  
+  // Grid settings state
+  const [gridVisible, setGridVisible] = useState(true);
+  const [gridColor, setGridColor] = useState('#888888');
+  const [gridPrimarySize, setGridPrimarySize] = useState(1);
+  const [gridSecondarySize, setGridSecondarySize] = useState(10);
+  const [gridElevation, setGridElevation] = useState(0);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -166,9 +265,16 @@ const FormaAnalysisIntegration = () => {
         hemisphereLight.position.set(0, 100, 0);
         scene.add(hemisphereLight);
 
-        // Add Grid Helper
-        const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x333333);
-        scene.add(gridHelper);
+        // Add Fancy Infinite Grid
+        const infiniteGrid = createInfiniteGrid({
+          size: 200,
+          color1: new THREE.Color(0x444444),
+          color2: new THREE.Color(0x888888),
+          fadeDistance: 150,
+          fadeStrength: 1.5,
+        });
+        scene.add(infiniteGrid);
+        gridRef.current = infiniteGrid;
 
         // Add Axes Helper
         const axesHelper = new THREE.AxesHelper(10);
@@ -183,12 +289,12 @@ const FormaAnalysisIntegration = () => {
         const ifcApi = new WebIFC.IfcAPI();
         ifcApiRef.current = ifcApi;
 
-        // Use CDN for WASM path to ensure reliable loading
-        const wasmPath = 'https://unpkg.com/web-ifc@0.0.75/';
-        ifcApi.SetWasmPath(wasmPath);
-        console.log('WASM path set to:', wasmPath);
+        // Set WASM path using jsdelivr CDN with explicit absolute path
+        ifcApi.SetWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.75/', true);
+        console.log('WASM path set to CDN: https://cdn.jsdelivr.net/npm/web-ifc@0.0.75/');
 
         setLoadingProgress('Loading WASM module...');
+        // Initialize web-ifc
         await ifcApi.Init();
         console.log('WebIFC initialized successfully');
 
@@ -414,6 +520,34 @@ const FormaAnalysisIntegration = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Update grid visibility
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.visible = gridVisible;
+    }
+  }, [gridVisible]);
+
+  // Update grid color
+  useEffect(() => {
+    if (gridRef.current && gridRef.current.setColors) {
+      gridRef.current.setColors(gridColor, gridColor);
+    }
+  }, [gridColor]);
+
+  // Update grid sizes
+  useEffect(() => {
+    if (gridRef.current && gridRef.current.setSizes) {
+      gridRef.current.setSizes(gridPrimarySize, gridSecondarySize);
+    }
+  }, [gridPrimarySize, gridSecondarySize]);
+
+  // Update grid elevation
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.position.y = gridElevation;
+    }
+  }, [gridElevation]);
+
   const currentAnalysis = ANALYSIS_TYPES[activeAnalysis];
   const AnalysisIcon = currentAnalysis.icon;
   const analysisStats = ANALYSIS_STATS[activeAnalysis];
@@ -509,6 +643,81 @@ const FormaAnalysisIntegration = () => {
                 onChange={(e) => setAnalysisOpacity(parseFloat(e.target.value))}
                 style={styles.slider}
               />
+            </div>
+
+            {/* Grid Settings Section */}
+            <div style={styles.gridSection}>
+              <h4 style={styles.sectionSubtitle}>Grid Settings</h4>
+              
+              {/* Grid Visibility */}
+              <label style={styles.toggleLabel}>
+                <input
+                  type="checkbox"
+                  checked={gridVisible}
+                  onChange={(e) => setGridVisible(e.target.checked)}
+                  style={styles.checkbox}
+                />
+                <span style={styles.toggleText}>Show Grid</span>
+              </label>
+
+              {/* Grid Color */}
+              <div style={styles.colorInputSection}>
+                <label style={styles.sliderLabel}>Grid Color</label>
+                <input
+                  type="color"
+                  value={gridColor}
+                  onChange={(e) => setGridColor(e.target.value)}
+                  style={styles.colorInput}
+                />
+              </div>
+
+              {/* Primary Grid Size */}
+              <div style={styles.sliderSection}>
+                <label style={styles.sliderLabel}>
+                  Primary Size: {gridPrimarySize.toFixed(1)}
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="10"
+                  step="0.1"
+                  value={gridPrimarySize}
+                  onChange={(e) => setGridPrimarySize(parseFloat(e.target.value))}
+                  style={styles.slider}
+                />
+              </div>
+
+              {/* Secondary Grid Size */}
+              <div style={styles.sliderSection}>
+                <label style={styles.sliderLabel}>
+                  Secondary Size: {gridSecondarySize.toFixed(1)}
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={gridSecondarySize}
+                  onChange={(e) => setGridSecondarySize(parseFloat(e.target.value))}
+                  style={styles.slider}
+                />
+              </div>
+
+              {/* Grid Elevation */}
+              <div style={styles.sliderSection}>
+                <label style={styles.sliderLabel}>
+                  Elevation: {gridElevation.toFixed(1)}m
+                </label>
+                <input
+                  type="range"
+                  min="-20"
+                  max="50"
+                  step="0.5"
+                  value={gridElevation}
+                  onChange={(e) => setGridElevation(parseFloat(e.target.value))}
+                  style={styles.slider}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -770,6 +979,33 @@ const styles = {
     outline: 'none',
     WebkitAppearance: 'none',
     appearance: 'none',
+  },
+  gridSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    paddingTop: '16px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  sectionSubtitle: {
+    margin: 0,
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  colorInputSection: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '10px',
+  },
+  colorInput: {
+    width: '40px',
+    height: '30px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
   },
   rightPanel: {
     position: 'absolute',

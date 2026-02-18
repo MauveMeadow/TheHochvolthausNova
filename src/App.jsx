@@ -12,7 +12,6 @@ import ChatSupport from './components/ChatSupport'
 import HistoryPage from './components/HistoryPage'
 import SignIn from './components/SignIn'
 import SignUp from './components/SignUp'
-import RoomReservation from './components/RoomReservation'
 import Contact from './components/Contact'
 import AnalysisViewer from './components/AnalysisViewer'
 import FormaAnalysisIntegration from './components/FormaAnalysisIntegration'
@@ -87,7 +86,6 @@ function App() {
         <Routes>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/reservations" element={<RoomReservation />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/location-map" element={<LocationMap />} />
           <Route path="/building-timeline" element={<BuildingTimeline />} />

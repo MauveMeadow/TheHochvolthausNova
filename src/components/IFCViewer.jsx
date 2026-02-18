@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as WebIFC from 'web-ifc';
+import { Grid } from 'lucide-react';
 
 // IFC Type names mapping
 const IFC_TYPES = {
@@ -47,6 +48,8 @@ const IFCViewer = () => {
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
   const originalMaterialsRef = useRef(new Map());
+  const gridRef = useRef(null);
+  const modelBaseYRef = useRef(0); // Store the model's base Y position
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -60,6 +63,10 @@ const IFCViewer = () => {
   const [spatialStructure, setSpatialStructure] = useState(null);
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState('properties');
+  
+  // Grid settings state
+  const [gridVisible, setGridVisible] = useState(true);
+  const [gridElevation, setGridElevation] = useState(0);
 
   // Get element properties from IFC
   const getElementProperties = useCallback(async (expressId) => {
@@ -468,12 +475,24 @@ const IFCViewer = () => {
         hemisphereLight.position.set(0, 100, 0);
         scene.add(hemisphereLight);
 
-        // Add Grid Helper
-        const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x333333);
+        // Add Grid Helper - A plane grid that the IFC model sits on
+        // Make it large enough to be visible with big models
+        const gridSize = 1000; // Large grid size
+        const gridDivisions = 100; // Creates 10m spacing for visibility
+        const gridHelper = new THREE.GridHelper(
+          gridSize, 
+          gridDivisions, 
+          new THREE.Color(0x666666), // Center line color (brighter)
+          new THREE.Color(0x444444)  // Grid line color
+        );
+        gridHelper.position.y = 0; // Grid at y=0 level initially
+        gridHelper.material.opacity = 0.8;
+        gridHelper.material.transparent = true;
         scene.add(gridHelper);
+        gridRef.current = gridHelper;
 
-        // Add Axes Helper
-        const axesHelper = new THREE.AxesHelper(10);
+        // Add Axes Helper (larger for visibility)
+        const axesHelper = new THREE.AxesHelper(50);
         scene.add(axesHelper);
 
         if (disposedRef.current) return;
@@ -485,11 +504,12 @@ const IFCViewer = () => {
         const ifcApi = new WebIFC.IfcAPI();
         ifcApiRef.current = ifcApi;
         
-        // Set WASM path - USE CDN to fix 404 error on GitHub Pages
-        ifcApi.SetWasmPath('https://unpkg.com/web-ifc@0.0.75/');
-        console.log('WASM path set to CDN: https://unpkg.com/web-ifc@0.0.75/');
+        // Set WASM path using jsdelivr CDN with explicit absolute path
+        ifcApi.SetWasmPath('https://cdn.jsdelivr.net/npm/web-ifc@0.0.75/', true);
+        console.log('WASM path set to CDN: https://cdn.jsdelivr.net/npm/web-ifc@0.0.75/');
         
         setLoadingProgress('Loading WASM module...');
+        // Initialize web-ifc
         await ifcApi.Init();
         console.log('WebIFC initialized successfully');
 
@@ -659,6 +679,16 @@ const IFCViewer = () => {
         const size = boundingBox.getSize(new THREE.Vector3());
 
         console.log('Model bounds:', { center, size });
+        console.log('Model min Y:', boundingBox.min.y, 'max Y:', boundingBox.max.y);
+
+        // Store the model's base Y position for grid elevation reference
+        modelBaseYRef.current = boundingBox.min.y;
+
+        // Position the grid at the bottom of the model and center it horizontally
+        if (gridRef.current) {
+          gridRef.current.position.set(center.x, boundingBox.min.y, center.z);
+          console.log('Grid positioned at:', gridRef.current.position);
+        }
 
         const maxDim = Math.max(size.x, size.y, size.z);
         const fov = camera.fov * (Math.PI / 180);
@@ -761,6 +791,24 @@ const IFCViewer = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Update grid visibility
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.visible = gridVisible;
+    }
+  }, [gridVisible]);
+
+  // Update grid elevation (move grid to different storey level)
+  // gridElevation is relative to the model's base (ground floor)
+  useEffect(() => {
+    if (gridRef.current) {
+      // Add the elevation offset to the model's base Y position
+      const newY = modelBaseYRef.current + gridElevation;
+      gridRef.current.position.y = newY;
+      console.log('Grid elevation updated to:', newY, '(base:', modelBaseYRef.current, '+ offset:', gridElevation, ')');
+    }
+  }, [gridElevation]);
+
   // Render spatial structure tree
   const renderStructureTree = (nodes, level = 0) => {
     return nodes.map((node) => (
@@ -860,6 +908,15 @@ const IFCViewer = () => {
                   onClick={() => setActiveTab('categories')}
                 >
                   Categories
+                </button>
+                <button
+                  style={{
+                    ...styles.tab,
+                    ...(activeTab === 'grid' ? styles.activeTab : {})
+                  }}
+                  onClick={() => setActiveTab('grid')}
+                >
+                  Grid
                 </button>
               </div>
 
@@ -983,6 +1040,87 @@ const IFCViewer = () => {
                     {categories.length === 0 && (
                       <p style={styles.hint}>No categories found</p>
                     )}
+                  </div>
+                )}
+
+                {/* Grid Tab */}
+                {activeTab === 'grid' && (
+                  <div style={styles.gridSettingsContainer}>
+                    <p style={styles.hint}>
+                      <Grid size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                      Control the reference grid plane
+                    </p>
+                    
+                    {/* Grid Visibility Toggle */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridToggleLabel}>
+                        <input
+                          type="checkbox"
+                          checked={gridVisible}
+                          onChange={(e) => setGridVisible(e.target.checked)}
+                          style={styles.gridCheckbox}
+                        />
+                        <span>Show Grid Plane</span>
+                      </label>
+                      <p style={styles.gridDescription}>
+                        The grid provides a reference plane for the IFC model positioning
+                      </p>
+                    </div>
+
+                    {/* Grid Elevation Slider */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridSliderLabel}>
+                        Grid Elevation: {gridElevation.toFixed(1)}m
+                      </label>
+                      <input
+                        type="range"
+                        min="-20"
+                        max="50"
+                        step="0.5"
+                        value={gridElevation}
+                        onChange={(e) => setGridElevation(parseFloat(e.target.value))}
+                        style={styles.gridSlider}
+                      />
+                      <div style={styles.gridSliderLabels}>
+                        <span>-20m</span>
+                        <span>0m</span>
+                        <span>50m</span>
+                      </div>
+                      <p style={styles.gridDescription}>
+                        Move the grid to different floor levels to check model alignment
+                      </p>
+                    </div>
+
+                    {/* Quick Level Buttons */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridSliderLabel}>Quick Levels</label>
+                      <div style={styles.quickLevelButtons}>
+                        <button
+                          style={styles.quickLevelBtn}
+                          onClick={() => setGridElevation(0)}
+                        >
+                          Ground (0m)
+                        </button>
+                        <button
+                          style={styles.quickLevelBtn}
+                          onClick={() => setGridElevation(3)}
+                        >
+                          Level 1 (3m)
+                        </button>
+                        <button
+                          style={styles.quickLevelBtn}
+                          onClick={() => setGridElevation(6)}
+                        >
+                          Level 2 (6m)
+                        </button>
+                        <button
+                          style={styles.quickLevelBtn}
+                          onClick={() => setGridElevation(9)}
+                        >
+                          Level 3 (9m)
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1171,7 +1309,10 @@ const styles = {
     padding: '12px 8px',
     backgroundColor: 'transparent',
     color: 'rgba(255, 255, 255, 0.6)',
-    border: 'none',
+    borderTop: 'none',
+    borderLeft: 'none',
+    borderRight: 'none',
+    borderBottom: '2px solid transparent',
     cursor: 'pointer',
     fontSize: '12px',
     fontWeight: '500',
@@ -1281,6 +1422,93 @@ const styles = {
     padding: '2px 8px',
     borderRadius: '10px',
   },
+  gridSettingsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  gridToggleLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    color: '#ffffff',
+    padding: '10px 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+  },
+  gridCheckbox: {
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+  },
+  gridControlRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  gridControlLabel: {
+    fontSize: '12px',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  colorInput: {
+    width: '100%',
+    height: '36px',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  gridSlider: {
+    width: '100%',
+    height: '6px',
+    borderRadius: '3px',
+    background: 'rgba(255, 255, 255, 0.2)',
+    outline: 'none',
+    WebkitAppearance: 'none',
+    appearance: 'none',
+    cursor: 'pointer',
+  },
+  gridControlSection: {
+    marginBottom: '20px',
+  },
+  gridDescription: {
+    fontSize: '11px',
+    color: 'rgba(255, 255, 255, 0.5)',
+    margin: '4px 0 0 0',
+    lineHeight: '1.4',
+  },
+  gridSliderLabel: {
+    display: 'block',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: '8px',
+  },
+  gridSliderLabels: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '10px',
+    color: 'rgba(255, 255, 255, 0.4)',
+    marginTop: '4px',
+  },
+  quickLevelButtons: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '8px',
+  },
+  quickLevelBtn: {
+    padding: '8px 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '6px',
+    color: '#ffffff',
+    fontSize: '11px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
 };
 
 // Add CSS animation for spinner
@@ -1290,6 +1518,23 @@ if (typeof document !== 'undefined') {
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #007AFF;
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #007AFF;
+      cursor: pointer;
+      border: none;
     }
   `;
   document.head.appendChild(styleSheet);

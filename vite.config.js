@@ -8,10 +8,6 @@ export default defineConfig({
     port: 3000,
     mimeTypes: {
       'wasm': 'application/wasm'
-    },
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp'
     }
   },
   build: {
@@ -27,6 +23,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    exclude: ['web-ifc'],
     esbuildOptions: {
       supported: {
         bigint: true
