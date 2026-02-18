@@ -50,6 +50,8 @@ const IFCViewer = () => {
   const originalMaterialsRef = useRef(new Map());
   const gridRef = useRef(null);
   const modelBaseYRef = useRef(0); // Store the model's base Y position
+  const modelCenterRef = useRef(new THREE.Vector3()); // Store the model's center position
+  const modelSizeRef = useRef(new THREE.Vector3()); // Store the model's size
   const planeHelpersRef = useRef([]); // Store plane helper visualizations
   const dragPlaneRef = useRef(null); // The clipping plane being dragged
   const dragStartPointRef = useRef(null); // Starting point of drag
@@ -699,6 +701,9 @@ const IFCViewer = () => {
 
         // Store the model's base Y position for grid elevation reference
         modelBaseYRef.current = boundingBox.min.y;
+        // Store model center and size for Views navigation
+        modelCenterRef.current.copy(center);
+        modelSizeRef.current.copy(size);
 
         // Position the grid at the bottom of the model and center it horizontally
         if (gridRef.current) {
@@ -1435,6 +1440,15 @@ const IFCViewer = () => {
                 >
                   Clipper
                 </button>
+                <button
+                  style={{
+                    ...styles.tab,
+                    ...(activeTab === 'views' ? styles.activeTab : {})
+                  }}
+                  onClick={() => setActiveTab('views')}
+                >
+                  Views
+                </button>
               </div>
 
               <div style={styles.tabContent}>
@@ -1745,6 +1759,232 @@ const IFCViewer = () => {
                           ))}
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Views Tab */}
+                {activeTab === 'views' && (
+                  <div style={styles.gridSettingsContainer}>
+                    <p style={styles.hint}>
+                      🏢 Navigate to different floor views
+                    </p>
+                    
+                    {/* Clear Floor Clip Button */}
+                    {clippingPlanes.some(cp => cp.isFloorClip) && (
+                      <div style={styles.gridControlSection}>
+                        <button
+                          style={styles.clearFloorClipBtn}
+                          onClick={() => {
+                            // Remove all floor clip planes
+                            const floorClips = clippingPlanes.filter(cp => cp.isFloorClip);
+                            floorClips.forEach(cp => removeClippingPlane(cp.id));
+                            
+                            // Reset to isometric view
+                            if (cameraRef.current && controlsRef.current) {
+                              const center = modelCenterRef.current;
+                              const maxDim = Math.max(modelSizeRef.current.x, modelSizeRef.current.y, modelSizeRef.current.z);
+                              const distance = maxDim * 1.2;
+                              controlsRef.current.target.copy(center);
+                              cameraRef.current.position.set(
+                                center.x + distance,
+                                center.y + distance * 0.7,
+                                center.z + distance
+                              );
+                              controlsRef.current.update();
+                            }
+                          }}
+                        >
+                          ✕ Clear Floor Section &amp; Show Full Model
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Floor Plans List */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridSliderLabel}>Floor Plans</label>
+                      <div style={styles.floorPlansList}>
+                        {(() => {
+                          // Extract all storeys from the spatial structure
+                          const floors = [];
+                          if (spatialStructure && spatialStructure.length > 0) {
+                            spatialStructure.forEach((project) => {
+                              project.children?.forEach((site) => {
+                                site.children?.forEach((building) => {
+                                  building.children?.forEach((storey) => {
+                                    floors.push(storey);
+                                  });
+                                });
+                              });
+                            });
+                          }
+                          
+                          console.log('Floors found:', floors.length, floors);
+                          
+                          // If no floors found in IFC, create default floors based on model height
+                          if (floors.length === 0 && modelSizeRef.current.y > 0) {
+                            const modelHeight = modelSizeRef.current.y;
+                            const floorHeight = 3; // Assume 3m per floor
+                            const numFloors = Math.max(1, Math.ceil(modelHeight / floorHeight));
+                            
+                            for (let i = 0; i < numFloors; i++) {
+                              floors.push({
+                                id: `default-floor-${i}`,
+                                name: i === 0 ? 'Ground Floor' : `Floor ${i}`,
+                                elevation: i * floorHeight,
+                                type: 'Storey'
+                              });
+                            }
+                          }
+                          
+                          if (floors.length === 0) {
+                            return (
+                              <p style={styles.gridDescription}>
+                                No floor information available. Load a model first.
+                              </p>
+                            );
+                          }
+                          
+                          // Sort floors by elevation (highest first)
+                          floors.sort((a, b) => (b.elevation || 0) - (a.elevation || 0));
+                          
+                          return floors.map((storey, index) => (
+                            <button
+                              key={storey.id}
+                              style={styles.floorPlanBtn}
+                              onClick={() => {
+                                const elevation = storey.elevation || 0;
+                                console.log('Navigating to floor:', storey.name, 'elevation:', elevation);
+                                
+                                // Calculate the actual Y position for the clipping plane
+                                const clipY = modelBaseYRef.current + elevation + 2.5; // Slightly above floor level
+                                
+                                // Remove existing floor view clipping planes
+                                const existingFloorClips = clippingPlanes.filter(cp => cp.isFloorClip);
+                                existingFloorClips.forEach(cp => removeClippingPlane(cp.id));
+                                
+                                // Create a horizontal clipping plane pointing down (clips everything above)
+                                const planeNormal = new THREE.Vector3(0, -1, 0); // Points down
+                                const planePoint = new THREE.Vector3(modelCenterRef.current.x, clipY, modelCenterRef.current.z);
+                                
+                                const plane = new THREE.Plane();
+                                plane.setFromNormalAndCoplanarPoint(planeNormal, planePoint);
+                                
+                                const id = Date.now();
+                                const newClippingPlane = {
+                                  id,
+                                  plane,
+                                  enabled: true,
+                                  position: planePoint.clone(),
+                                  normal: planeNormal.clone(),
+                                  isFloorClip: true, // Mark as floor clip for easy removal
+                                };
+                                
+                                // No visual helper for floor clips - just the clipping plane
+                                
+                                setClippingPlanes(prev => [...prev, newClippingPlane]);
+                                setClippingEnabled(true);
+                                
+                                // Position camera for top-down view of this floor
+                                if (cameraRef.current && controlsRef.current) {
+                                  const centerX = modelCenterRef.current.x;
+                                  const centerZ = modelCenterRef.current.z;
+                                  const targetY = modelBaseYRef.current + elevation + 1.5;
+                                  
+                                  // Top-down view to see the floor plan
+                                  const maxDim = Math.max(modelSizeRef.current.x, modelSizeRef.current.z);
+                                  controlsRef.current.target.set(centerX, targetY, centerZ);
+                                  cameraRef.current.position.set(centerX, targetY + maxDim * 1.2, centerZ + 0.01);
+                                  controlsRef.current.update();
+                                }
+                                
+                                // Also set grid to this elevation
+                                setGridElevation(elevation);
+                              }}
+                            >
+                              <div style={styles.floorPlanInfo}>
+                                <span style={styles.floorPlanName}>{storey.name || `Floor ${floors.length - index}`}</span>
+                                <span style={styles.floorPlanElevation}>
+                                  Elevation: {storey.elevation !== undefined ? `${storey.elevation.toFixed(2)}m` : 'N/A'}
+                                </span>
+                              </div>
+                              <span style={styles.floorPlanArrow}>→</span>
+                            </button>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Quick View Buttons */}
+                    <div style={styles.gridControlSection}>
+                      <label style={styles.gridSliderLabel}>Quick Views</label>
+                      <div style={styles.quickViewButtons}>
+                        <button
+                          style={styles.quickViewBtn}
+                          onClick={() => {
+                            if (cameraRef.current && controlsRef.current) {
+                              // Top-down view
+                              const center = modelCenterRef.current;
+                              const maxDim = Math.max(modelSizeRef.current.x, modelSizeRef.current.z);
+                              controlsRef.current.target.copy(center);
+                              cameraRef.current.position.set(center.x, center.y + maxDim * 1.5, center.z + 0.01);
+                              controlsRef.current.update();
+                            }
+                          }}
+                        >
+                          🔽 Top View
+                        </button>
+                        <button
+                          style={styles.quickViewBtn}
+                          onClick={() => {
+                            if (cameraRef.current && controlsRef.current) {
+                              // Front view
+                              const center = modelCenterRef.current;
+                              const maxDim = Math.max(modelSizeRef.current.x, modelSizeRef.current.y);
+                              controlsRef.current.target.copy(center);
+                              cameraRef.current.position.set(center.x, center.y, center.z + maxDim * 1.5);
+                              controlsRef.current.update();
+                            }
+                          }}
+                        >
+                          🏠 Front View
+                        </button>
+                        <button
+                          style={styles.quickViewBtn}
+                          onClick={() => {
+                            if (cameraRef.current && controlsRef.current) {
+                              // Side view
+                              const center = modelCenterRef.current;
+                              const maxDim = Math.max(modelSizeRef.current.z, modelSizeRef.current.y);
+                              controlsRef.current.target.copy(center);
+                              cameraRef.current.position.set(center.x + maxDim * 1.5, center.y, center.z);
+                              controlsRef.current.update();
+                            }
+                          }}
+                        >
+                          📐 Side View
+                        </button>
+                        <button
+                          style={styles.quickViewBtn}
+                          onClick={() => {
+                            if (cameraRef.current && controlsRef.current) {
+                              // Isometric view
+                              const center = modelCenterRef.current;
+                              const maxDim = Math.max(modelSizeRef.current.x, modelSizeRef.current.y, modelSizeRef.current.z);
+                              const distance = maxDim * 1.2;
+                              controlsRef.current.target.copy(center);
+                              cameraRef.current.position.set(
+                                center.x + distance,
+                                center.y + distance * 0.7,
+                                center.z + distance
+                              );
+                              controlsRef.current.update();
+                            }
+                          }}
+                        >
+                          🎯 Isometric
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2284,6 +2524,70 @@ const styles = {
   clipperPlaneItemSelected: {
     borderColor: '#007AFF',
     backgroundColor: 'rgba(0, 122, 255, 0.15)',
+  },
+  // Views tab styles
+  clearFloorClipBtn: {
+    width: '100%',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(255, 149, 0, 0.2)',
+    border: '1px solid rgba(255, 149, 0, 0.5)',
+    borderRadius: '8px',
+    color: '#ff9500',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  floorPlansList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  floorPlanBtn: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 14px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '8px',
+    color: '#ffffff',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    textAlign: 'left',
+  },
+  floorPlanInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  floorPlanName: {
+    fontSize: '14px',
+    fontWeight: '500',
+  },
+  floorPlanElevation: {
+    fontSize: '11px',
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  floorPlanArrow: {
+    fontSize: '18px',
+    color: '#007AFF',
+  },
+  quickViewButtons: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '8px',
+  },
+  quickViewBtn: {
+    padding: '12px 10px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '8px',
+    color: '#ffffff',
+    fontSize: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    textAlign: 'center',
   },
 };
 
